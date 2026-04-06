@@ -2,6 +2,8 @@
 
 import { forwardRef } from "react"
 import { CardState } from "@/lib/card-types"
+import { getFontFamily } from "@/lib/font-options"
+import { getCardNumberGroups } from "@/lib/card-number"
 
 interface CardBackProps {
   card: CardState
@@ -21,6 +23,8 @@ const CardBack = forwardRef<HTMLDivElement, CardBackProps>(
       numberColor,
       nameAlign,
       numberAlign,
+      nameFont,
+      numberFont,
       nameFontSize,
       numberFontSize,
       numberDirection,
@@ -29,9 +33,14 @@ const CardBack = forwardRef<HTMLDivElement, CardBackProps>(
     const showName = nameSide === "back"
     const showNumber = numberSide === "back"
     const isVertical = numberDirection === "vertical"
+    const numberGroups = getCardNumberGroups(number)
+    const nameFontFamily = getFontFamily(nameFont)
+    const numberFontFamily = getFontFamily(numberFont)
 
-    const w = 342 * scale
-    const h = 216 * scale
+    const baseW = 342
+    const baseH = 216
+    const w = baseW * scale
+    const h = baseH * scale
     const radius = 12 * scale
     const magneticBandHeight = 40 * scale
     const magneticBandTop = 28 * scale
@@ -47,7 +56,8 @@ const CardBack = forwardRef<HTMLDivElement, CardBackProps>(
           position: "relative",
           overflow: "hidden",
           backgroundColor: back.bgColor,
-          boxShadow: forExport ? "none" : "0 20px 60px rgba(0,0,0,0.3)",
+          boxShadow: forExport ? "none" : "var(--card-shadow, 0 20px 60px rgba(0,0,0,0.3))",
+          transition: forExport ? "none" : "box-shadow 200ms ease",
           flexShrink: 0,
           userSelect: "none",
         }}
@@ -69,24 +79,30 @@ const CardBack = forwardRef<HTMLDivElement, CardBackProps>(
         )}
 
         {/* Overlay images — behind magnetic band */}
-        {back.images.map((img) => (
-          <div
-            key={img.id}
-            style={{
-              position: "absolute",
-              left: img.x * scale,
-              top: img.y * scale,
-              width: img.width * scale,
-              height: img.height * scale,
-              zIndex: 1,
-              opacity: img.opacity,
-              backgroundImage: `url(${img.src})`,
-              backgroundSize: "contain",
-              backgroundPosition: "center",
-              backgroundRepeat: "no-repeat",
-            }}
-          />
-        ))}
+        {back.images.map((img) => {
+          const imageScale = img.scale ?? 1
+          const scaledW = img.width * imageScale
+          const scaledH = img.height * imageScale
+          const isFullBleed = scaledW >= baseW && scaledH >= baseH
+          return (
+            <div
+              key={img.id}
+              style={{
+                position: "absolute",
+                left: img.x * scale,
+                top: img.y * scale,
+                width: scaledW * scale,
+                height: scaledH * scale,
+                zIndex: 1,
+                opacity: img.opacity,
+                backgroundImage: `url(${img.src})`,
+                backgroundSize: isFullBleed ? "cover" : "contain",
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat",
+              }}
+            />
+          )
+        })}
 
         {/* Subtle gradient for legibility */}
         <div
@@ -167,7 +183,7 @@ const CardBack = forwardRef<HTMLDivElement, CardBackProps>(
               left: 18 * scale,
               right: 18 * scale,
               zIndex: 5,
-              fontFamily: "'Courier New', monospace",
+              fontFamily: numberFontFamily,
               fontWeight: 600,
               fontSize: numberFontSize * scale,
               letterSpacing: "0.15em",
@@ -180,26 +196,33 @@ const CardBack = forwardRef<HTMLDivElement, CardBackProps>(
           </div>
         )}
 
-        {/* Card number on back — vertical */}
+        {/* Card number on back — vertical (stacked groups) */}
         {showNumber && isVertical && (
           <div
             style={{
               position: "absolute",
               left: 18 * scale,
               top: "50%",
-              transform: "translateY(-50%) rotate(-90deg)",
-              transformOrigin: "center center",
+              transform: "translateY(-50%)",
               zIndex: 5,
-              fontFamily: "'Courier New', monospace",
+              fontFamily: numberFontFamily,
               fontWeight: 600,
               fontSize: numberFontSize * scale,
-              letterSpacing: "0.18em",
+              letterSpacing: "0.12em",
               color: numberColor,
               textShadow: "0 1px 3px rgba(0,0,0,0.5)",
-              whiteSpace: "nowrap",
+              display: "flex",
+              flexDirection: "column",
+              gap: 6 * scale,
+              textAlign: numberAlign,
+              minWidth: 84 * scale,
             }}
           >
-            {number || "0000 0000 0000 0000"}
+            {numberGroups.map((group, index) => (
+              <div key={`${group}-${index}`} style={{ lineHeight: 1 }}>
+                {group}
+              </div>
+            ))}
           </div>
         )}
 
@@ -212,7 +235,7 @@ const CardBack = forwardRef<HTMLDivElement, CardBackProps>(
               left: 18 * scale,
               right: 18 * scale,
               zIndex: 5,
-              fontFamily: "var(--font-space-grotesk, 'Space Grotesk', sans-serif)",
+              fontFamily: nameFontFamily,
               fontWeight: 600,
               fontSize: nameFontSize * scale,
               letterSpacing: "0.08em",

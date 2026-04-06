@@ -19,14 +19,8 @@ export async function exportCardsPDF(
     // Override oklch/lab colors that html2canvas can't parse
     onclone: (cloned: Document) => {
       // Force all elements to use rgb colors by ensuring no oklch/lab leaks in
-      const allEls = cloned.querySelectorAll<HTMLElement>("*")
-      allEls.forEach((el) => {
-        const computed = window.getComputedStyle(el)
-        const bg = computed.backgroundColor
-        if (bg && (bg.includes("oklch") || bg.includes("lab"))) {
-          el.style.backgroundColor = "transparent"
-        }
-      })
+      normalizeCloneColors(frontEl, cloned)
+      normalizeCloneColors(backEl, cloned)
     },
   }
 
@@ -83,39 +77,16 @@ export async function exportCardsPDF(
   // Label
   pdf.text("DORSO", cardX, backY - 5)
 
-  // ── INFOGRAPHY BADGE ──
-  const badgeW = 150
-  const badgeH = 26
-  const badgeX = (A4_W - badgeW) / 2
-  const badgeY = backY + CARD_H + 14
-
-  pdf.setLineDashPattern([], 0)
-  pdf.setFillColor(255, 249, 219)
-  pdf.setDrawColor(210, 165, 40)
-  pdf.setLineWidth(0.4)
-  pdf.roundedRect(badgeX, badgeY, badgeW, badgeH, 3, 3, "FD")
-
-  // Badge icon (lightbulb represented with text)
-  pdf.setFont("helvetica", "bold")
-  pdf.setFontSize(9)
-  pdf.setTextColor(150, 100, 0)
-  pdf.text("!", badgeX + 5, badgeY + 9)
-
-  // Badge main text
-  pdf.setFont("helvetica", "bold")
-  pdf.setFontSize(7.5)
+  // ── INFO TEXT (SINGLE LINE, NO BOX) ──
+  const infoY = backY + CARD_H + 18
+  pdf.setFont("helvetica", "normal")
+  pdf.setFontSize(6)
   pdf.setTextColor(100, 65, 0)
   pdf.text(
-    "Acordate de pedir que te lo impriman en papel autoadhesivo,",
-    badgeX + 12,
-    badgeY + 9
-  )
-  pdf.setFont("helvetica", "normal")
-  pdf.setFontSize(7.5)
-  pdf.text(
-    "asi lo podes pegar facil :)",
-    badgeX + 12,
-    badgeY + 17
+    "Acordate de pedir que te lo impriman en papel autoadhesivo, asi lo podes pegar facil :)",
+    A4_W / 2,
+    infoY,
+    { align: "center" }
   )
 
   // ── FOOTER ──
@@ -139,4 +110,89 @@ function drawDashedRect(
   pdf.setLineWidth(0.2)
   pdf.setLineDashPattern([1.5, 1.5], 0)
   pdf.roundedRect(x, y, w, h, r, r, "S")
+}
+
+const COLOR_PROPS = [
+  "color",
+  "background-color",
+  "border-top-color",
+  "border-right-color",
+  "border-bottom-color",
+  "border-left-color",
+  "outline-color",
+  "text-shadow",
+  "box-shadow",
+  "fill",
+  "stroke",
+  "background-image",
+] as const
+
+let colorCanvas: HTMLCanvasElement | null = null
+let colorCtx: CanvasRenderingContext2D | null = null
+
+function normalizeCloneColors(sourceRoot: HTMLElement, clonedDoc: Document) {
+  const cloneRoot = clonedDoc.querySelector<HTMLElement>(
+    `[data-card-side="${sourceRoot.dataset.cardSide}"]`
+  )
+  if (!cloneRoot) return
+
+  const sourceEls = [sourceRoot, ...sourceRoot.querySelectorAll<HTMLElement>("*")]
+  const cloneEls = [cloneRoot, ...cloneRoot.querySelectorAll<HTMLElement>("*")]
+  const len = Math.min(sourceEls.length, cloneEls.length)
+
+  for (let i = 0; i < len; i++) {
+    const sourceEl = sourceEls[i]
+    const cloneEl = cloneEls[i]
+    const computed = window.getComputedStyle(sourceEl)
+
+    for (const prop of COLOR_PROPS) {
+      const value = computed.getPropertyValue(prop)
+      if (!value || (!value.includes("oklch") && !value.includes("lab"))) continue
+
+      const fixed = replaceUnsupportedColors(value)
+      if (!fixed) continue
+
+      cloneEl.style.setProperty(prop, fixed)
+    }
+  }
+}
+
+function replaceUnsupportedColors(value: string) {
+  const replaced = value.replace(/(oklch|lab)\([^)]*\)/g, (match) => {
+    const rgb = toRgb(match)
+    return rgb ?? "rgba(0, 0, 0, 0)"
+  })
+
+  if (replaced !== value) return replaced
+
+  // If we couldn't replace, fall back to transparent to avoid crashes
+  if (value.includes("oklch") || value.includes("lab")) return "transparent"
+  return value
+}
+
+function toRgb(color: string) {
+  if (!color) return null
+
+  if (!colorCanvas) {
+    colorCanvas = document.createElement("canvas")
+    colorCanvas.width = 1
+    colorCanvas.height = 1
+    colorCtx = colorCanvas.getContext("2d")
+  }
+
+  if (!colorCtx) return null
+
+  try {
+    colorCtx.clearRect(0, 0, 1, 1)
+    colorCtx.fillStyle = "rgba(0, 0, 0, 0)"
+    colorCtx.fillStyle = color.trim()
+    colorCtx.fillRect(0, 0, 1, 1)
+    const data = colorCtx.getImageData(0, 0, 1, 1).data
+    const [r, g, b, a] = data
+    if (a === 255) return `rgb(${r}, ${g}, ${b})`
+    const alpha = Math.round((a / 255) * 1000) / 1000
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`
+  } catch {
+    return null
+  }
 }

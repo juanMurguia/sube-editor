@@ -5,74 +5,92 @@
 
 :root {
   /* Brand: SUBE blue + electric accent */
-  --background: oklch(0.97 0.005 240);
-  --foreground: oklch(0.12 0.02 250);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.12 0.02 250);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.12 0.02 250);
-  --primary: oklch(0.48 0.19 255);
-  --primary-foreground: oklch(0.98 0 0);
-  --secondary: oklch(0.93 0.015 240);
-  --secondary-foreground: oklch(0.25 0.04 250);
-  --muted: oklch(0.93 0.01 240);
-  --muted-foreground: oklch(0.5 0.02 240);
-  --accent: oklch(0.72 0.19 55);
-  --accent-foreground: oklch(0.12 0.02 250);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.98 0 0);
-  --border: oklch(0.88 0.01 240);
-  --input: oklch(0.88 0.01 240);
-  --ring: oklch(0.48 0.19 255);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
+  --background: rgb(242, 246, 248);
+  --foreground: rgb(2, 6, 13);
+  --card: rgb(255, 255, 255);
+  --card-foreground: rgb(2, 6, 13);
+  --popover: rgb(255, 255, 255);
+  --popover-foreground: rgb(2, 6, 13);
+  --primary: rgb(0, 88, 196);
+  --primary-foreground: rgb(248, 248, 248);
+  --secondary: rgb(223, 233, 241);
+  --secondary-foreground: rgb(18, 35, 52);
+  --muted: rgb(226, 233, 238);
+  --muted-foreground: rgb(89, 101, 110);
+  --accent: rgb(251, 124, 0);
+  --accent-foreground: rgb(2, 6, 13);
+  --destructive: rgb(231, 0, 11);
+  --destructive-foreground: rgb(248, 248, 248);
+  --border: rgb(210, 216, 221);
+  --input: rgb(210, 216, 221);
+  --ring: rgb(0, 88, 196);
+  --chart-1: rgb(245, 73, 0);
+  --chart-2: rgb(0, 150, 137);
+  --chart-3: rgb(16, 78, 100);
+  --chart-4: rgb(255, 185, 0);
+  --chart-5: rgb(254, 154, 0);
   --radius: 0.75rem;
-  --sidebar: oklch(0.97 0.005 240);
-  --sidebar-foreground: oklch(0.12 0.02 250);
-  --sidebar-primary: oklch(0.48 0.19 255);
-  --sidebar-primary-foreground: oklch(0.98 0 0);
-  --sidebar-accent: oklch(0.93 0.015 240);
-  --sidebar-accent-foreground: oklch(0.25 0.04 250);
-  --sidebar-border: oklch(0.88 0.01 240);
-  --sidebar-ring: oklch(0.48 0.19 255);
+  --elevation-0: 0;
+  --elevation-1: 1;
+  --elevation-2: 3;
+  --elevation-3: 6;
+  --elevation-4: 8;
+  --elevation-5: 12;
+  --elevation-shadow-1: 0 1px 2px rgba(2, 6, 13, 0.08), 0 2px 6px rgba(2, 6, 13, 0.06);
+  --elevation-shadow-2: 0 2px 4px rgba(2, 6, 13, 0.1), 0 8px 16px rgba(2, 6, 13, 0.08);
+  --elevation-shadow-3: 0 6px 12px rgba(2, 6, 13, 0.12), 0 16px 28px rgba(2, 6, 13, 0.1);
+  --sidebar: rgb(242, 246, 248);
+  --sidebar-foreground: rgb(2, 6, 13);
+  --sidebar-primary: rgb(0, 88, 196);
+  --sidebar-primary-foreground: rgb(248, 248, 248);
+  --sidebar-accent: rgb(223, 233, 241);
+  --sidebar-accent-foreground: rgb(18, 35, 52);
+  --sidebar-border: rgb(210, 216, 221);
+  --sidebar-ring: rgb(0, 88, 196);
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.145 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.145 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.985 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.396 0.141 25.723);
-  --destructive-foreground: oklch(0.637 0.237 25.331);
-  --border: oklch(0.269 0 0);
-  --input: oklch(0.269 0 0);
-  --ring: oklch(0.439 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.269 0 0);
-  --sidebar-ring: oklch(0.439 0 0);
+  --background: rgb(10, 10, 10);
+  --foreground: rgb(250, 250, 250);
+  --card: rgb(10, 10, 10);
+  --card-foreground: rgb(250, 250, 250);
+  --popover: rgb(10, 10, 10);
+  --popover-foreground: rgb(250, 250, 250);
+  --primary: rgb(250, 250, 250);
+  --primary-foreground: rgb(23, 23, 23);
+  --secondary: rgb(38, 38, 38);
+  --secondary-foreground: rgb(250, 250, 250);
+  --muted: rgb(38, 38, 38);
+  --muted-foreground: rgb(161, 161, 161);
+  --accent: rgb(38, 38, 38);
+  --accent-foreground: rgb(250, 250, 250);
+  --destructive: rgb(130, 24, 26);
+  --destructive-foreground: rgb(251, 44, 54);
+  --border: rgb(38, 38, 38);
+  --input: rgb(38, 38, 38);
+  --ring: rgb(82, 82, 82);
+  --chart-1: rgb(20, 71, 230);
+  --chart-2: rgb(0, 188, 125);
+  --chart-3: rgb(254, 154, 0);
+  --chart-4: rgb(173, 70, 255);
+  --chart-5: rgb(255, 32, 86);
+  --elevation-0: 0;
+  --elevation-1: 1;
+  --elevation-2: 3;
+  --elevation-3: 6;
+  --elevation-4: 8;
+  --elevation-5: 12;
+  --elevation-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.35);
+  --elevation-shadow-2: 0 4px 8px rgba(0, 0, 0, 0.5), 0 10px 18px rgba(0, 0, 0, 0.4);
+  --elevation-shadow-3: 0 10px 20px rgba(0, 0, 0, 0.55), 0 22px 40px rgba(0, 0, 0, 0.45);
+  --sidebar: rgb(23, 23, 23);
+  --sidebar-foreground: rgb(250, 250, 250);
+  --sidebar-primary: rgb(20, 71, 230);
+  --sidebar-primary-foreground: rgb(250, 250, 250);
+  --sidebar-accent: rgb(38, 38, 38);
+  --sidebar-accent-foreground: rgb(250, 250, 250);
+  --sidebar-border: rgb(38, 38, 38);
+  --sidebar-ring: rgb(82, 82, 82);
 }
 
 @theme inline {
@@ -123,5 +141,35 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  .elev-level-0 {
+    --elevation-level: var(--elevation-0);
+  }
+  .elev-level-1 {
+    --elevation-level: var(--elevation-1);
+  }
+  .elev-level-2 {
+    --elevation-level: var(--elevation-2);
+  }
+  .elev-level-3 {
+    --elevation-level: var(--elevation-3);
+  }
+  .elev-level-4 {
+    --elevation-level: var(--elevation-4);
+  }
+  .elev-level-5 {
+    --elevation-level: var(--elevation-5);
+  }
+  .elev-shadow-1 {
+    box-shadow: var(--elevation-shadow-1);
+  }
+  .elev-shadow-2 {
+    box-shadow: var(--elevation-shadow-2);
+  }
+  .elev-shadow-3 {
+    box-shadow: var(--elevation-shadow-3);
   }
 }

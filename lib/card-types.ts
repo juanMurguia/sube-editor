@@ -1,3 +1,5 @@
+import type { FontId } from "./font-options"
+
 export type CardSide = "front" | "back"
 export type TextColor = "white" | "black" | "custom"
 export type TextAlign = "left" | "center" | "right"
@@ -9,6 +11,7 @@ export interface CardImage {
   y: number
   width: number
   height: number
+  scale: number
   opacity: number
 }
 
@@ -37,6 +40,8 @@ export interface CardState {
   numberColor: string
   nameAlign: TextAlign
   numberAlign: TextAlign
+  nameFont: FontId
+  numberFont: FontId
   nameFontSize: number
   numberFontSize: number
   numberDirection: "horizontal" | "vertical"
@@ -55,14 +60,16 @@ export interface CardState {
 }
 
 export const defaultCardState: CardState = {
-  name: "MARIA GONZALEZ",
-  number: "0000 0000 0000 0000",
+  name: "",
+  number: "",
   nameSide: "front",
   numberSide: "front",
   nameColor: "#ffffff",
   numberColor: "#ffffff",
   nameAlign: "left",
   numberAlign: "left",
+  nameFont: "space-grotesk",
+  numberFont: "space-grotesk",
   nameFontSize: 14,
   numberFontSize: 13,
   numberDirection: "horizontal",

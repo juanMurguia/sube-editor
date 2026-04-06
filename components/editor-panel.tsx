@@ -1,16 +1,23 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useRef } from "react"
 import { CardState, CardSide, TextAlign } from "@/lib/card-types"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Slider } from "@/components/ui/slider"
+import { getFontFamily, NAME_FONT_OPTIONS, NUMBER_FONT_OPTIONS } from "@/lib/font-options"
 import {
   Upload,
-  Link,
   Palette,
   AlignLeft,
   AlignCenter,
@@ -29,14 +36,12 @@ interface EditorPanelProps {
 }
 
 export default function EditorPanel({ card, onChange }: EditorPanelProps) {
+  const cardWidth = 342
+  const cardHeight = 216
   const frontFileRef = useRef<HTMLInputElement>(null)
   const backFileRef = useRef<HTMLInputElement>(null)
   const frontOverlayRef = useRef<HTMLInputElement>(null)
   const backOverlayRef = useRef<HTMLInputElement>(null)
-  const [urlInput, setUrlInput] = useState("")
-  const [urlTarget, setUrlTarget] = useState<"bg" | "overlay">("bg")
-  const [urlSide, setUrlSide] = useState<CardSide>("front")
-  const [urlError, setUrlError] = useState("")
 
   const activeSide = card.activeSide
   const design = card[activeSide]
@@ -68,37 +73,13 @@ export default function EditorPanel({ card, onChange }: EditorPanelProps) {
           ...prev[side],
           images: [
             ...prev[side].images,
-            { id: crypto.randomUUID(), src, x: 10, y: 10, width: 80, height: 80, opacity: 1 },
+            { id: crypto.randomUUID(), src, x: 0, y: 0, width: cardWidth, height: cardHeight, scale: 1, opacity: 1 },
           ],
         },
       }))
     }
     reader.readAsDataURL(file)
     e.target.value = ""
-  }
-
-  function handleAddUrl() {
-    setUrlError("")
-    if (!urlInput.trim()) return
-    const url = urlInput.trim()
-    if (urlTarget === "bg") {
-      onChange((prev) => ({
-        ...prev,
-        [urlSide]: { ...prev[urlSide], bgImage: url },
-      }))
-    } else {
-      onChange((prev) => ({
-        ...prev,
-        [urlSide]: {
-          ...prev[urlSide],
-          images: [
-            ...prev[urlSide].images,
-            { id: crypto.randomUUID(), src: url, x: 10, y: 10, width: 80, height: 80, opacity: 1 },
-          ],
-        },
-      }))
-    }
-    setUrlInput("")
   }
 
   function removeBg(side: CardSide) {
@@ -123,21 +104,29 @@ export default function EditorPanel({ card, onChange }: EditorPanelProps) {
     { value: "back", label: "Dorso" },
   ]
 
+  const typographyOptions = [...NAME_FONT_OPTIONS, ...NUMBER_FONT_OPTIONS]
+
+  function handleTypographyChange(value: string) {
+    const fontId = value as typeof card.nameFont
+    onChange({ nameFont: fontId, numberFont: fontId })
+  }
+
   return (
-    <div className="flex flex-col gap-0 h-full overflow-y-auto">
+    <div className="flex flex-col h-full overflow-y-auto pb-6">
       {/* Active side tabs */}
-      <div className="px-4 pt-4 pb-2 border-b border-border">
-        <p className="text-xs text-muted-foreground font-medium mb-2 uppercase tracking-wide">Editando cara</p>
-        <div className="flex gap-2">
+      <div className="px-5 pt-5 pb-3 border-b border-border/70">
+        <p className="text-[11px] text-muted-foreground font-semibold mb-2 uppercase tracking-[0.2em]">Editando cara</p>
+        <div className="grid grid-cols-2 gap-2">
           {sideOptions.map((opt) => (
             <button
               key={opt.value}
               onClick={() => onChange({ activeSide: opt.value })}
+              aria-pressed={activeSide === opt.value}
               className={cn(
-                "flex-1 py-1.5 rounded-lg text-sm font-semibold transition-all",
+                "flex-1 py-1.5 rounded-lg text-sm font-semibold transition-[transform,box-shadow,background-color,color] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 active:scale-[0.98] elev-level-1",
                 activeSide === opt.value
-                  ? "bg-primary text-primary-foreground shadow"
-                  : "bg-secondary text-secondary-foreground hover:bg-muted"
+                  ? "bg-primary text-primary-foreground elev-shadow-1"
+                  : "bg-secondary text-secondary-foreground hover:bg-muted hover:text-foreground hover:shadow-[var(--elevation-shadow-1)]"
               )}
             >
               {opt.label}
@@ -147,43 +136,44 @@ export default function EditorPanel({ card, onChange }: EditorPanelProps) {
       </div>
 
       <Tabs defaultValue="datos" className="flex-1">
-        <TabsList className="w-full rounded-none border-b border-border h-auto p-0 bg-transparent">
-          <TabsTrigger value="datos" className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent py-2.5 text-xs gap-1">
+        <TabsList className="w-full h-auto rounded-xl border border-border/60 bg-secondary p-1 elev-level-1">
+          <TabsTrigger value="datos" className="flex-1 rounded-lg px-3 py-2 text-xs font-semibold text-muted-foreground gap-1 transition-[color,box-shadow,background-color] hover:bg-background/70 hover:text-foreground hover:shadow-[var(--elevation-shadow-1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-[var(--elevation-shadow-1)]">
             <Type size={13} /> Datos
           </TabsTrigger>
-          <TabsTrigger value="fondo" className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent py-2.5 text-xs gap-1">
+          <TabsTrigger value="fondo" className="flex-1 rounded-lg px-3 py-2 text-xs font-semibold text-muted-foreground gap-1 transition-[color,box-shadow,background-color] hover:bg-background/70 hover:text-foreground hover:shadow-[var(--elevation-shadow-1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-[var(--elevation-shadow-1)]">
             <Palette size={13} /> Fondo
           </TabsTrigger>
-          <TabsTrigger value="imagenes" className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent py-2.5 text-xs gap-1">
+          <TabsTrigger value="imagenes" className="flex-1 rounded-lg px-3 py-2 text-xs font-semibold text-muted-foreground gap-1 transition-[color,box-shadow,background-color] hover:bg-background/70 hover:text-foreground hover:shadow-[var(--elevation-shadow-1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-[var(--elevation-shadow-1)]">
             <ImageIcon size={13} /> Imágenes
-          </TabsTrigger>
-          <TabsTrigger value="url" className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent py-2.5 text-xs gap-1">
-            <Link size={13} /> URL
           </TabsTrigger>
         </TabsList>
 
         {/* DATOS */}
-        <TabsContent value="datos" className="px-4 py-4 flex flex-col gap-5 m-0">
+        <TabsContent value="datos" className="px-5 py-5 flex flex-col gap-6 m-0">
           {/* Name */}
-          <div className="flex flex-col gap-2">
-            <Label className="text-xs font-semibold text-foreground uppercase tracking-wide">Nombre</Label>
+          <div className="flex flex-col gap-3 rounded-xl border border-border/60 bg-secondary p-4 elev-level-2">
+            <Label className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-2">
+              <Type size={13} />
+              Nombre
+            </Label>
             <Input
-              placeholder="TU NOMBRE"
+              placeholder=" Juan Cruz"
               value={card.name}
               onChange={(e) => onChange({ name: e.target.value.toUpperCase() })}
-              className="font-mono text-sm"
+              className="font-mono text-sm transition-shadow focus-visible:shadow-[0_0_0_3px_hsl(var(--primary)/0.2)]"
               maxLength={26}
             />
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-muted-foreground">Mostrar en:</span>
-              <div className="flex gap-1">
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <span className="text-[11px] text-muted-foreground uppercase tracking-wide">Mostrar en</span>
+              <div className="flex gap-1.5">
                 {sideOptions.map((s) => (
                   <button
                     key={s.value}
                     onClick={() => onChange({ nameSide: s.value })}
+                    aria-pressed={card.nameSide === s.value}
                     className={cn(
-                      "px-2 py-0.5 rounded text-xs font-medium transition-all",
-                      card.nameSide === s.value ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground hover:bg-muted"
+                      "px-2.5 py-1 rounded-md text-xs font-semibold transition-[transform,box-shadow,background-color,color] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 active:scale-[0.98] elev-level-1",
+                      card.nameSide === s.value ? "bg-primary text-primary-foreground elev-shadow-1" : "bg-secondary text-secondary-foreground hover:bg-muted hover:text-foreground hover:shadow-[var(--elevation-shadow-1)]"
                     )}
                   >
                     {s.label}
@@ -192,24 +182,25 @@ export default function EditorPanel({ card, onChange }: EditorPanelProps) {
               </div>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-xs text-muted-foreground">Color:</span>
+              <span className="text-[11px] text-muted-foreground uppercase tracking-wide">Color</span>
               <input
                 type="color"
                 value={card.nameColor}
                 onChange={(e) => onChange({ nameColor: e.target.value })}
-                className="w-7 h-7 rounded cursor-pointer border border-border"
+                className="w-7 h-7 rounded cursor-pointer border border-border transition-transform hover:scale-105 active:scale-95"
                 title="Color del nombre"
               />
               <span className="font-mono text-xs text-foreground">{card.nameColor.toUpperCase()}</span>
-              <span className="text-xs text-muted-foreground">Alineación:</span>
-              <div className="flex gap-1">
+              <span className="text-[11px] text-muted-foreground uppercase tracking-wide">Alineación</span>
+              <div className="flex gap-1.5">
                 {alignOptions.map((a) => (
                   <button
                     key={a.value}
                     onClick={() => onChange({ nameAlign: a.value })}
+                    aria-pressed={card.nameAlign === a.value}
                     className={cn(
-                      "p-1 rounded transition-all",
-                      card.nameAlign === a.value ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground hover:bg-muted"
+                      "p-1.5 rounded-md transition-[transform,box-shadow,background-color,color] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 active:scale-95 elev-level-1",
+                      card.nameAlign === a.value ? "bg-primary text-primary-foreground elev-shadow-1" : "bg-secondary text-secondary-foreground hover:bg-muted hover:text-foreground hover:shadow-[var(--elevation-shadow-1)]"
                     )}
                   >
                     {a.icon}
@@ -230,11 +221,12 @@ export default function EditorPanel({ card, onChange }: EditorPanelProps) {
             </div>
           </div>
 
-          <div className="h-px bg-border" />
-
           {/* Number */}
-          <div className="flex flex-col gap-2">
-            <Label className="text-xs font-semibold text-foreground uppercase tracking-wide">Número</Label>
+          <div className="flex flex-col gap-3 rounded-xl border border-border/60 bg-secondary p-4 elev-level-2">
+            <Label className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-2">
+              <CreditCard size={13} />
+              Número
+            </Label>
             <Input
               placeholder="0000 0000 0000 0000"
               value={card.number}
@@ -243,19 +235,20 @@ export default function EditorPanel({ card, onChange }: EditorPanelProps) {
                 v = v.replace(/(.{4})/g, "$1 ").trim()
                 onChange({ number: v })
               }}
-              className="font-mono text-sm tracking-widest"
+              className="font-mono text-sm tracking-widest transition-shadow focus-visible:shadow-[0_0_0_3px_hsl(var(--primary)/0.2)]"
               maxLength={19}
             />
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-muted-foreground">Mostrar en:</span>
-              <div className="flex gap-1">
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <span className="text-[11px] text-muted-foreground uppercase tracking-wide">Mostrar en</span>
+              <div className="flex gap-1.5">
                 {sideOptions.map((s) => (
                   <button
                     key={s.value}
                     onClick={() => onChange({ numberSide: s.value })}
+                    aria-pressed={card.numberSide === s.value}
                     className={cn(
-                      "px-2 py-0.5 rounded text-xs font-medium transition-all",
-                      card.numberSide === s.value ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground hover:bg-muted"
+                      "px-2.5 py-1 rounded-md text-xs font-semibold transition-[transform,box-shadow,background-color,color] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 active:scale-[0.98] elev-level-1",
+                      card.numberSide === s.value ? "bg-primary text-primary-foreground elev-shadow-1" : "bg-secondary text-secondary-foreground hover:bg-muted hover:text-foreground hover:shadow-[var(--elevation-shadow-1)]"
                     )}
                   >
                     {s.label}
@@ -264,24 +257,25 @@ export default function EditorPanel({ card, onChange }: EditorPanelProps) {
               </div>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-xs text-muted-foreground">Color:</span>
+              <span className="text-[11px] text-muted-foreground uppercase tracking-wide">Color</span>
               <input
                 type="color"
                 value={card.numberColor}
                 onChange={(e) => onChange({ numberColor: e.target.value })}
-                className="w-7 h-7 rounded cursor-pointer border border-border"
+                className="w-7 h-7 rounded cursor-pointer border border-border transition-transform hover:scale-105 active:scale-95"
                 title="Color del número"
               />
               <span className="font-mono text-xs text-foreground">{card.numberColor.toUpperCase()}</span>
-              <span className="text-xs text-muted-foreground">Alineación:</span>
-              <div className="flex gap-1">
+              <span className="text-[11px] text-muted-foreground uppercase tracking-wide">Alineación</span>
+              <div className="flex gap-1.5">
                 {alignOptions.map((a) => (
                   <button
                     key={a.value}
                     onClick={() => onChange({ numberAlign: a.value })}
+                    aria-pressed={card.numberAlign === a.value}
                     className={cn(
-                      "p-1 rounded transition-all",
-                      card.numberAlign === a.value ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground hover:bg-muted"
+                      "p-1.5 rounded-md transition-[transform,box-shadow,background-color,color] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 active:scale-95 elev-level-1",
+                      card.numberAlign === a.value ? "bg-primary text-primary-foreground elev-shadow-1" : "bg-secondary text-secondary-foreground hover:bg-muted hover:text-foreground hover:shadow-[var(--elevation-shadow-1)]"
                     )}
                   >
                     {a.icon}
@@ -289,14 +283,15 @@ export default function EditorPanel({ card, onChange }: EditorPanelProps) {
                 ))}
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-muted-foreground">Dirección:</span>
-              <div className="flex gap-1">
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <span className="text-[11px] text-muted-foreground uppercase tracking-wide">Dirección</span>
+              <div className="flex gap-1.5">
                 <button
                   onClick={() => onChange({ numberDirection: "horizontal" })}
+                  aria-pressed={card.numberDirection === "horizontal"}
                   className={cn(
-                    "flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-all",
-                    card.numberDirection === "horizontal" ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground hover:bg-muted"
+                    "flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-semibold transition-[transform,box-shadow,background-color,color] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 active:scale-[0.98] elev-level-1",
+                    card.numberDirection === "horizontal" ? "bg-primary text-primary-foreground elev-shadow-1" : "bg-secondary text-secondary-foreground hover:bg-muted hover:text-foreground hover:shadow-[var(--elevation-shadow-1)]"
                   )}
                 >
                   <AlignHorizontalDistributeCenter size={12} />
@@ -304,9 +299,10 @@ export default function EditorPanel({ card, onChange }: EditorPanelProps) {
                 </button>
                 <button
                   onClick={() => onChange({ numberDirection: "vertical" })}
+                  aria-pressed={card.numberDirection === "vertical"}
                   className={cn(
-                    "flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-all",
-                    card.numberDirection === "vertical" ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground hover:bg-muted"
+                    "flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-semibold transition-[transform,box-shadow,background-color,color] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 active:scale-[0.98] elev-level-1",
+                    card.numberDirection === "vertical" ? "bg-primary text-primary-foreground elev-shadow-1" : "bg-secondary text-secondary-foreground hover:bg-muted hover:text-foreground hover:shadow-[var(--elevation-shadow-1)]"
                   )}
                 >
                   <AlignVerticalDistributeCenter size={12} />
@@ -327,10 +323,32 @@ export default function EditorPanel({ card, onChange }: EditorPanelProps) {
             </div>
           </div>
 
-          <div className="h-px bg-border" />
+          {/* Typography */}
+          <div className="flex flex-col gap-3 rounded-xl border border-border/60 bg-secondary p-4 elev-level-2">
+            <Label className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-2">
+              <Type size={13} />
+              Tipografía
+            </Label>
+            <span className="text-[11px] text-muted-foreground uppercase tracking-wide">Aplica a nombre y número</span>
+            <Select value={card.nameFont} onValueChange={handleTypographyChange}>
+              <SelectTrigger
+                className="w-full transition-shadow focus-visible:shadow-[0_0_0_3px_hsl(var(--primary)/0.2)]"
+                style={{ fontFamily: getFontFamily(card.nameFont) }}
+              >
+                <SelectValue placeholder="Elegí una fuente" />
+              </SelectTrigger>
+              <SelectContent>
+                {typographyOptions.map((opt) => (
+                  <SelectItem key={opt.id} value={opt.id}>
+                    <span style={{ fontFamily: getFontFamily(opt.id) }}>{opt.label}</span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
           {/* Card label */}
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between rounded-xl border border-border/60 bg-secondary px-4 py-3 elev-level-2">
             <span className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-1.5">
               <CreditCard size={13} />
               Texto &quot;SUBE&quot;
@@ -338,7 +356,7 @@ export default function EditorPanel({ card, onChange }: EditorPanelProps) {
             <button
               onClick={() => onChange({ showCardLabel: !card.showCardLabel })}
               className={cn(
-                "relative inline-flex h-5 w-9 items-center rounded-full transition-colors",
+                "relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
                 card.showCardLabel ? "bg-primary" : "bg-muted"
               )}
             >
@@ -351,9 +369,9 @@ export default function EditorPanel({ card, onChange }: EditorPanelProps) {
         </TabsContent>
 
         {/* FONDO */}
-        <TabsContent value="fondo" className="px-4 py-4 flex flex-col gap-4 m-0">
-          <div>
-            <p className="text-xs text-muted-foreground uppercase tracking-wide font-semibold mb-2">
+        <TabsContent value="fondo" className="px-5 py-5 flex flex-col gap-5 m-0">
+          <div className="flex flex-col gap-3 rounded-xl border border-border/60 bg-secondary p-4 elev-level-2">
+            <p className="text-[11px] text-muted-foreground uppercase tracking-[0.2em] font-semibold">
               Color de fondo — {activeSide === "front" ? "Frente" : "Dorso"}
             </p>
             <div className="flex items-center gap-3">
@@ -366,22 +384,20 @@ export default function EditorPanel({ card, onChange }: EditorPanelProps) {
                     [activeSide]: { ...prev[activeSide], bgColor: e.target.value },
                   }))
                 }
-                className="w-10 h-10 rounded-lg cursor-pointer border border-border"
+                className="w-10 h-10 rounded-lg cursor-pointer border border-border transition-transform hover:scale-105 active:scale-95"
               />
               <span className="font-mono text-sm text-foreground">{design.bgColor.toUpperCase()}</span>
             </div>
           </div>
 
-          <div className="h-px bg-border" />
-
-          <div>
-            <p className="text-xs text-muted-foreground uppercase tracking-wide font-semibold mb-2">
+          <div className="flex flex-col gap-3 rounded-xl border border-border/60 bg-secondary p-4 elev-level-2">
+            <p className="text-[11px] text-muted-foreground uppercase tracking-[0.2em] font-semibold">
               Imagen de fondo — {activeSide === "front" ? "Frente" : "Dorso"}
             </p>
             {design.bgImage ? (
               <div className="flex flex-col gap-2">
                 <div
-                  className="w-full h-20 rounded-lg border border-border overflow-hidden"
+                  className="w-full h-20 rounded-lg border border-border overflow-hidden shadow-[var(--elevation-shadow-1)]"
                   style={{
                     backgroundImage: `url(${design.bgImage})`,
                     backgroundSize: "cover",
@@ -415,22 +431,22 @@ export default function EditorPanel({ card, onChange }: EditorPanelProps) {
                         }))
                       }
                       className={cn(
-                        "flex-1 py-1 rounded text-xs font-medium transition-all capitalize",
-                        design.bgImageFit === fit ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground hover:bg-muted"
+                        "flex-1 py-1 rounded-md text-xs font-semibold transition-[transform,box-shadow,background-color,color] duration-200 capitalize focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 active:scale-[0.98] elev-level-1",
+                        design.bgImageFit === fit ? "bg-primary text-primary-foreground elev-shadow-1" : "bg-secondary text-secondary-foreground hover:bg-muted hover:text-foreground hover:shadow-[var(--elevation-shadow-1)]"
                       )}
                     >
                       {fit}
                     </button>
                   ))}
                 </div>
-                <Button variant="outline" size="sm" onClick={() => removeBg(activeSide)}>
+                <Button variant="outline" size="sm" onClick={() => removeBg(activeSide)} className="transition-transform active:scale-[0.98]">
                   Quitar imagen
                 </Button>
               </div>
             ) : (
               <button
                 onClick={() => activeSide === "front" ? frontFileRef.current?.click() : backFileRef.current?.click()}
-                className="w-full border-2 border-dashed border-border rounded-lg py-6 flex flex-col items-center gap-2 hover:border-primary hover:bg-primary/5 transition-all text-muted-foreground"
+                className="w-full border-2 border-dashed border-border rounded-lg py-6 flex flex-col items-center gap-2 text-muted-foreground transition-[border-color,background-color,transform,box-shadow,color] duration-200 hover:border-primary hover:bg-primary/5 hover:text-foreground hover:shadow-[var(--elevation-shadow-1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 active:scale-[0.99]"
               >
                 <Upload size={20} />
                 <span className="text-sm font-medium">Subir imagen de fondo</span>
@@ -455,13 +471,13 @@ export default function EditorPanel({ card, onChange }: EditorPanelProps) {
         </TabsContent>
 
         {/* IMAGENES */}
-        <TabsContent value="imagenes" className="px-4 py-4 flex flex-col gap-4 m-0">
-          <p className="text-xs text-muted-foreground uppercase tracking-wide font-semibold">
+        <TabsContent value="imagenes" className="px-5 py-5 flex flex-col gap-5 m-0">
+          <p className="text-[11px] text-muted-foreground uppercase tracking-[0.2em] font-semibold">
             Imágenes encima — {activeSide === "front" ? "Frente" : "Dorso"}
           </p>
           <button
             onClick={() => activeSide === "front" ? frontOverlayRef.current?.click() : backOverlayRef.current?.click()}
-            className="w-full border-2 border-dashed border-border rounded-lg py-5 flex flex-col items-center gap-2 hover:border-primary hover:bg-primary/5 transition-all text-muted-foreground"
+            className="w-full border-2 border-dashed border-border rounded-lg py-5 flex flex-col items-center gap-2 text-muted-foreground transition-[border-color,background-color,transform,box-shadow,color] duration-200 hover:border-primary hover:bg-primary/5 hover:text-foreground hover:shadow-[var(--elevation-shadow-1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 active:scale-[0.99]"
           >
             <Layers size={20} />
             <span className="text-sm font-medium">Agregar imagen encima</span>
@@ -487,7 +503,7 @@ export default function EditorPanel({ card, onChange }: EditorPanelProps) {
           ) : (
             <div className="flex flex-col gap-3">
               {design.images.map((img, i) => (
-                <div key={img.id} className="flex flex-col gap-2 p-3 bg-secondary rounded-lg">
+                <div key={img.id} className="flex flex-col gap-2 p-3 bg-secondary rounded-lg border border-border/60 transition-shadow hover:shadow-[var(--elevation-shadow-1)]">
                   <div className="flex items-center gap-2">
                     <div
                       className="w-10 h-10 rounded border border-border overflow-hidden flex-shrink-0"
@@ -529,19 +545,19 @@ export default function EditorPanel({ card, onChange }: EditorPanelProps) {
                     />
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-muted-foreground w-20">Tamaño: {img.width}px</span>
+                    <span className="text-xs text-muted-foreground w-20">Escala: {Math.round(img.scale * 100)}%</span>
                     <Slider
-                      min={20}
-                      max={340}
-                      step={10}
-                      value={[img.width]}
+                      min={25}
+                      max={200}
+                      step={5}
+                      value={[Math.round(img.scale * 100)]}
                       onValueChange={([v]) =>
                         onChange((prev) => ({
                           ...prev,
                           [activeSide]: {
                             ...prev[activeSide],
                             images: prev[activeSide].images.map((im) =>
-                              im.id === img.id ? { ...im, width: v, height: v } : im
+                              im.id === img.id ? { ...im, scale: v / 100 } : im
                             ),
                           },
                         }))
@@ -551,7 +567,7 @@ export default function EditorPanel({ card, onChange }: EditorPanelProps) {
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <div className="flex flex-col gap-1">
-                      <span className="text-xs text-muted-foreground">Pos X: {img.x}</span>
+                      <span className="text-xs text-muted-foreground">Posición horizontal: {img.x}</span>
                       <Slider
                         min={0}
                         max={342}
@@ -571,7 +587,7 @@ export default function EditorPanel({ card, onChange }: EditorPanelProps) {
                       />
                     </div>
                     <div className="flex flex-col gap-1">
-                      <span className="text-xs text-muted-foreground">Pos Y: {img.y}</span>
+                      <span className="text-xs text-muted-foreground">Posición vertical: {img.y}</span>
                       <Slider
                         min={0}
                         max={216}
@@ -597,84 +613,6 @@ export default function EditorPanel({ card, onChange }: EditorPanelProps) {
           )}
         </TabsContent>
 
-        {/* URL */}
-        <TabsContent value="url" className="px-4 py-4 flex flex-col gap-4 m-0">
-          <div>
-            <p className="text-xs text-muted-foreground uppercase tracking-wide font-semibold mb-2">Agregar imagen por URL</p>
-
-            <div className="flex flex-col gap-3">
-              <Input
-                placeholder="https://ejemplo.com/imagen.jpg"
-                value={urlInput}
-                onChange={(e) => { setUrlInput(e.target.value); setUrlError("") }}
-                className="text-xs"
-              />
-
-              <div className="grid grid-cols-2 gap-2">
-                <div className="flex flex-col gap-1">
-                  <span className="text-xs text-muted-foreground font-medium">Tipo</span>
-                  <div className="flex gap-1">
-                    <button
-                      onClick={() => setUrlTarget("bg")}
-                      className={cn(
-                        "flex-1 py-1 rounded text-xs font-medium transition-all",
-                        urlTarget === "bg" ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground hover:bg-muted"
-                      )}
-                    >
-                      Fondo
-                    </button>
-                    <button
-                      onClick={() => setUrlTarget("overlay")}
-                      className={cn(
-                        "flex-1 py-1 rounded text-xs font-medium transition-all",
-                        urlTarget === "overlay" ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground hover:bg-muted"
-                      )}
-                    >
-                      Encima
-                    </button>
-                  </div>
-                </div>
-                <div className="flex flex-col gap-1">
-                  <span className="text-xs text-muted-foreground font-medium">Cara</span>
-                  <div className="flex gap-1">
-                    <button
-                      onClick={() => setUrlSide("front")}
-                      className={cn(
-                        "flex-1 py-1 rounded text-xs font-medium transition-all",
-                        urlSide === "front" ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground hover:bg-muted"
-                      )}
-                    >
-                      Frente
-                    </button>
-                    <button
-                      onClick={() => setUrlSide("back")}
-                      className={cn(
-                        "flex-1 py-1 rounded text-xs font-medium transition-all",
-                        urlSide === "back" ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground hover:bg-muted"
-                      )}
-                    >
-                      Dorso
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {urlError && <p className="text-xs text-destructive">{urlError}</p>}
-
-              <Button onClick={handleAddUrl} className="w-full gap-2" size="sm">
-                <Link size={14} />
-                Agregar imagen
-              </Button>
-            </div>
-          </div>
-
-          <div className="p-3 bg-secondary rounded-lg">
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              <strong className="text-foreground">Tip:</strong> Usá imágenes de Unsplash, Pexels u otros sitios. 
-              Asegurate de que la URL termine en .jpg, .png o .webp para mejores resultados.
-            </p>
-          </div>
-        </TabsContent>
       </Tabs>
     </div>
   )

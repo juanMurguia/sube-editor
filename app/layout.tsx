@@ -1,10 +1,38 @@
 import type { Metadata } from 'next'
-import { Inter, Space_Grotesk } from 'next/font/google'
+import {
+  Archivo,
+  IBM_Plex_Mono,
+  Inter,
+  JetBrains_Mono,
+  Roboto_Mono,
+  Sora,
+  Space_Grotesk,
+} from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
-const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], variable: '--font-space-grotesk' })
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' })
+const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], variable: '--font-space-grotesk', display: 'swap' })
+const sora = Sora({ subsets: ['latin'], variable: '--font-sora', display: 'swap' })
+const archivo = Archivo({ subsets: ['latin'], variable: '--font-archivo', display: 'swap' })
+const robotoMono = Roboto_Mono({
+  subsets: ['latin'],
+  variable: '--font-roboto-mono',
+  display: 'swap',
+  weight: ['400', '500', '700'],
+})
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  variable: '--font-jetbrains-mono',
+  display: 'swap',
+  weight: ['400', '500', '700'],
+})
+const ibmPlexMono = IBM_Plex_Mono({
+  subsets: ['latin'],
+  variable: '--font-ibm-plex-mono',
+  display: 'swap',
+  weight: ['400', '500', '700'],
+})
 
 export const metadata: Metadata = {
   title: 'Tu SUBE Personalizada',
@@ -19,7 +47,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <body className={`${inter.variable} ${spaceGrotesk.variable} font-sans antialiased`}>
+      <body
+        className={`${inter.variable} ${spaceGrotesk.variable} ${sora.variable} ${archivo.variable} ${robotoMono.variable} ${jetbrainsMono.variable} ${ibmPlexMono.variable} font-sans antialiased`}
+      >
         {children}
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>

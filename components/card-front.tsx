@@ -2,6 +2,8 @@
 
 import { forwardRef } from "react"
 import { CardState } from "@/lib/card-types"
+import { getFontFamily } from "@/lib/font-options"
+import { getCardNumberGroups } from "@/lib/card-number"
 
 // SUBE card dimensions: 85.6mm × 54mm (standard credit card)
 // Preview render at 342×216 px
@@ -24,6 +26,8 @@ const CardFront = forwardRef<HTMLDivElement, CardFrontProps>(
       numberColor,
       nameAlign,
       numberAlign,
+      nameFont,
+      numberFont,
       nameFontSize,
       numberFontSize,
       numberDirection,
@@ -32,9 +36,14 @@ const CardFront = forwardRef<HTMLDivElement, CardFrontProps>(
     const showName = nameSide === "front"
     const showNumber = numberSide === "front"
     const isVertical = numberDirection === "vertical"
+    const numberGroups = getCardNumberGroups(number)
+    const nameFontFamily = getFontFamily(nameFont)
+    const numberFontFamily = getFontFamily(numberFont)
 
-    const w = 342 * scale
-    const h = 216 * scale
+    const baseW = 342
+    const baseH = 216
+    const w = baseW * scale
+    const h = baseH * scale
     const radius = 12 * scale
 
     return (
@@ -48,7 +57,8 @@ const CardFront = forwardRef<HTMLDivElement, CardFrontProps>(
           position: "relative",
           overflow: "hidden",
           backgroundColor: front.bgColor,
-          boxShadow: forExport ? "none" : "0 20px 60px rgba(0,0,0,0.3)",
+          boxShadow: forExport ? "none" : "var(--card-shadow, 0 20px 60px rgba(0,0,0,0.3))",
+          transition: forExport ? "none" : "box-shadow 200ms ease",
           flexShrink: 0,
           userSelect: "none",
         }}
@@ -69,23 +79,29 @@ const CardFront = forwardRef<HTMLDivElement, CardFrontProps>(
         )}
 
         {/* Overlay images */}
-        {front.images.map((img) => (
-          <div
-            key={img.id}
-            style={{
-              position: "absolute",
-              left: img.x * scale,
-              top: img.y * scale,
-              width: img.width * scale,
-              height: img.height * scale,
-              opacity: img.opacity,
-              backgroundImage: `url(${img.src})`,
-              backgroundSize: "contain",
-              backgroundPosition: "center",
-              backgroundRepeat: "no-repeat",
-            }}
-          />
-        ))}
+        {front.images.map((img) => {
+          const imageScale = img.scale ?? 1
+          const scaledW = img.width * imageScale
+          const scaledH = img.height * imageScale
+          const isFullBleed = scaledW >= baseW && scaledH >= baseH
+          return (
+            <div
+              key={img.id}
+              style={{
+                position: "absolute",
+                left: img.x * scale,
+                top: img.y * scale,
+                width: scaledW * scale,
+                height: scaledH * scale,
+                opacity: img.opacity,
+                backgroundImage: `url(${img.src})`,
+                backgroundSize: isFullBleed ? "cover" : "contain",
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat",
+              }}
+            />
+          )
+        })}
 
         {/* Subtle gradient overlay for text legibility */}
         <div
@@ -125,7 +141,7 @@ const CardFront = forwardRef<HTMLDivElement, CardFrontProps>(
               bottom: showName ? 44 * scale : 22 * scale,
               left: 18 * scale,
               right: 18 * scale,
-              fontFamily: "'Courier New', monospace",
+              fontFamily: numberFontFamily,
               fontWeight: 600,
               fontSize: numberFontSize * scale,
               letterSpacing: "0.15em",
@@ -138,25 +154,32 @@ const CardFront = forwardRef<HTMLDivElement, CardFrontProps>(
           </div>
         )}
 
-        {/* Card number — vertical (modern style) */}
+        {/* Card number — vertical (stacked groups) */}
         {showNumber && isVertical && (
           <div
             style={{
               position: "absolute",
               left: 18 * scale,
               top: "50%",
-              transform: "translateY(-50%) rotate(-90deg)",
-              transformOrigin: "center center",
-              fontFamily: "'Courier New', monospace",
+              transform: "translateY(-50%)",
+              fontFamily: numberFontFamily,
               fontWeight: 600,
               fontSize: numberFontSize * scale,
-              letterSpacing: "0.18em",
+              letterSpacing: "0.12em",
               color: numberColor,
               textShadow: "0 1px 3px rgba(0,0,0,0.5)",
-              whiteSpace: "nowrap",
+              display: "flex",
+              flexDirection: "column",
+              gap: 6 * scale,
+              textAlign: numberAlign,
+              minWidth: 84 * scale,
             }}
           >
-            {number || "0000 0000 0000 0000"}
+            {numberGroups.map((group, index) => (
+              <div key={`${group}-${index}`} style={{ lineHeight: 1 }}>
+                {group}
+              </div>
+            ))}
           </div>
         )}
 
@@ -168,7 +191,7 @@ const CardFront = forwardRef<HTMLDivElement, CardFrontProps>(
               bottom: 16 * scale,
               left: 18 * scale,
               right: 18 * scale,
-              fontFamily: "var(--font-space-grotesk, 'Space Grotesk', sans-serif)",
+              fontFamily: nameFontFamily,
               fontWeight: 600,
               fontSize: nameFontSize * scale,
               letterSpacing: "0.08em",
