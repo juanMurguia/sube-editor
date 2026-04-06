@@ -3,9 +3,8 @@
 import type { CardState } from "@/lib/card-types"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ImageIcon, Palette, Type } from "lucide-react"
-import { BackgroundTab } from "./editor-panel/background-tab"
-import { DataTab } from "./editor-panel/data-tab"
-import { ImagesTab } from "./editor-panel/images-tab"
+import dynamic from "next/dynamic"
+import { useState } from "react"
 import type { EditorChangeHandler, TextSideOption } from "./editor-panel/types"
 
 interface EditorPanelProps {
@@ -19,10 +18,52 @@ const TEXT_SIDE_OPTIONS: TextSideOption[] = [
   { value: "both", label: "Ambos" },
 ]
 
+const DataTab = dynamic(
+  () =>
+    import("./editor-panel/data-tab").then((mod) => ({
+      default: mod.DataTab,
+    })),
+  {
+    loading: () => (
+      <div className="px-5 py-6 text-xs text-muted-foreground">Cargando…</div>
+    ),
+  },
+)
+
+const BackgroundTab = dynamic(
+  () =>
+    import("./editor-panel/background-tab").then((mod) => ({
+      default: mod.BackgroundTab,
+    })),
+  {
+    loading: () => (
+      <div className="px-5 py-6 text-xs text-muted-foreground">Cargando…</div>
+    ),
+  },
+)
+
+const ImagesTab = dynamic(
+  () =>
+    import("./editor-panel/images-tab").then((mod) => ({
+      default: mod.ImagesTab,
+    })),
+  {
+    loading: () => (
+      <div className="px-5 py-6 text-xs text-muted-foreground">Cargando…</div>
+    ),
+  },
+)
+
 export default function EditorPanel({ card, onChange }: EditorPanelProps) {
+  const [activeTab, setActiveTab] = useState("datos")
+
   return (
     <div className="flex flex-col h-full overflow-y-auto pb-6">
-      <Tabs defaultValue="datos" className="flex-1">
+      <Tabs
+        value={activeTab}
+        onValueChange={setActiveTab}
+        className="flex-1"
+      >
         <div className="px-5 pt-4">
           <TabsList className="w-full h-auto rounded-xl border border-border/60 bg-secondary p-1 elev-level-1">
           <TabsTrigger
@@ -47,15 +88,25 @@ export default function EditorPanel({ card, onChange }: EditorPanelProps) {
         </div>
 
         <TabsContent value="datos" className="m-0">
-          <DataTab card={card} textSideOptions={TEXT_SIDE_OPTIONS} onChange={onChange} />
+          {activeTab === "datos" && (
+            <DataTab
+              card={card}
+              textSideOptions={TEXT_SIDE_OPTIONS}
+              onChange={onChange}
+            />
+          )}
         </TabsContent>
 
         <TabsContent value="fondo" className="m-0">
-          <BackgroundTab card={card} onChange={onChange} />
+          {activeTab === "fondo" && (
+            <BackgroundTab card={card} onChange={onChange} />
+          )}
         </TabsContent>
 
         <TabsContent value="imagenes" className="m-0">
-          <ImagesTab card={card} onChange={onChange} />
+          {activeTab === "imagenes" && (
+            <ImagesTab card={card} onChange={onChange} />
+          )}
         </TabsContent>
       </Tabs>
     </div>

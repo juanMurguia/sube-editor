@@ -38,7 +38,8 @@ function ImageItem({ image, index, onRemove, onUpdate }: ImageItemProps) {
         <button
           type="button"
           onClick={() => onRemove(image.id)}
-          className="cursor-pointer text-xs text-destructive hover:underline"
+          aria-label={`Quitar imagen ${index + 1}`}
+          className="cursor-pointer text-xs text-destructive hover:underline min-h-10 px-2 rounded-md touch-manipulation"
         >
           Quitar
         </button>

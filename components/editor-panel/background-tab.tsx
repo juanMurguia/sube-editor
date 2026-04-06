@@ -56,7 +56,8 @@ export function BackgroundTab({ card, onChange }: BackgroundTabProps) {
               updateSideColor("front", nextColor)
               setFrontHex(nextColor)
             }}
-            className="w-10 h-10 rounded-lg cursor-pointer border border-border transition-transform hover:scale-105 active:scale-95"
+            className="w-12 h-12 rounded-lg cursor-pointer border border-border transition-transform hover:scale-105 active:scale-95 sm:w-10 sm:h-10 touch-manipulation"
+            aria-label="Color de fondo del frente"
           />
           <input
             type="text"
@@ -65,6 +66,8 @@ export function BackgroundTab({ card, onChange }: BackgroundTabProps) {
             spellCheck={false}
             inputMode="text"
             placeholder="#1A56DB"
+            autoCapitalize="characters"
+            aria-label="Hex del color de fondo del frente"
             onChange={(e) => {
               const nextValue = e.target.value
               setFrontHex(nextValue)
@@ -74,7 +77,7 @@ export function BackgroundTab({ card, onChange }: BackgroundTabProps) {
               }
             }}
             onBlur={() => setFrontHex(card.front.bgColor)}
-            className="h-10 w-28 rounded-lg border border-border bg-background px-3 font-mono text-sm text-foreground shadow-[var(--elevation-shadow-1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+            className="h-11 w-28 rounded-lg border border-border bg-background px-3 font-mono text-sm text-foreground shadow-[var(--elevation-shadow-1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 sm:h-10"
           />
         </div>
       </SectionCard>
@@ -92,7 +95,8 @@ export function BackgroundTab({ card, onChange }: BackgroundTabProps) {
               updateSideColor("back", nextColor)
               setBackHex(nextColor)
             }}
-            className="w-10 h-10 rounded-lg cursor-pointer border border-border transition-transform hover:scale-105 active:scale-95"
+            className="w-12 h-12 rounded-lg cursor-pointer border border-border transition-transform hover:scale-105 active:scale-95 sm:w-10 sm:h-10 touch-manipulation"
+            aria-label="Color de fondo del dorso"
           />
           <input
             type="text"
@@ -101,6 +105,8 @@ export function BackgroundTab({ card, onChange }: BackgroundTabProps) {
             spellCheck={false}
             inputMode="text"
             placeholder="#1A56DB"
+            autoCapitalize="characters"
+            aria-label="Hex del color de fondo del dorso"
             onChange={(e) => {
               const nextValue = e.target.value
               setBackHex(nextValue)
@@ -110,7 +116,7 @@ export function BackgroundTab({ card, onChange }: BackgroundTabProps) {
               }
             }}
             onBlur={() => setBackHex(card.back.bgColor)}
-            className="h-10 w-28 rounded-lg border border-border bg-background px-3 font-mono text-sm text-foreground shadow-[var(--elevation-shadow-1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+            className="h-11 w-28 rounded-lg border border-border bg-background px-3 font-mono text-sm text-foreground shadow-[var(--elevation-shadow-1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 sm:h-10"
           />
         </div>
       </SectionCard>

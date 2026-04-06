@@ -1,3 +1,5 @@
+"use client"
+
 import type { ReactNode } from "react"
 import { Slider } from "@/components/ui/slider"
 import { cn } from "@/lib/utils"
@@ -12,13 +14,13 @@ type SegmentedOption<T extends string> = {
 
 const SEGMENTED_STYLES: Record<SegmentedVariant, { base: string; active: string; inactive: string }> = {
   panel: {
-    base: "flex-1 cursor-pointer py-1.5 rounded-lg text-sm font-semibold transition-[transform,box-shadow,background-color,color] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 active:scale-[0.98] elev-level-1",
+    base: "flex-1 cursor-pointer min-h-11 py-2 rounded-lg text-sm font-semibold transition-[transform,box-shadow,background-color,color] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 active:scale-[0.98] elev-level-1 sm:min-h-9 sm:py-1.5 touch-manipulation",
     active: "bg-primary text-primary-foreground elev-shadow-1",
     inactive:
       "bg-secondary text-secondary-foreground hover:bg-muted hover:text-foreground hover:shadow-[var(--elevation-shadow-1)]",
   },
   pill: {
-    base: "cursor-pointer px-2.5 py-1 rounded-md text-xs font-semibold transition-[transform,box-shadow,background-color,color] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 active:scale-[0.98] elev-level-1",
+    base: "cursor-pointer min-h-11 px-3 py-2 rounded-md text-xs font-semibold transition-[transform,box-shadow,background-color,color] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 active:scale-[0.98] elev-level-1 sm:min-h-9 sm:px-2.5 sm:py-1 touch-manipulation",
     active: "bg-primary text-primary-foreground elev-shadow-1",
     inactive:
       "bg-secondary text-secondary-foreground hover:bg-muted hover:text-foreground hover:shadow-[var(--elevation-shadow-1)]",
@@ -26,7 +28,7 @@ const SEGMENTED_STYLES: Record<SegmentedVariant, { base: string; active: string;
 }
 
 const ICON_TOGGLE_BASE =
-  "cursor-pointer p-1.5 rounded-md transition-[transform,box-shadow,background-color,color] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 active:scale-95 elev-level-1"
+  "cursor-pointer size-11 rounded-md flex items-center justify-center transition-[transform,box-shadow,background-color,color] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 active:scale-95 elev-level-1 sm:size-9 touch-manipulation"
 
 const ICON_TOGGLE_ACTIVE = "bg-primary text-primary-foreground elev-shadow-1"
 const ICON_TOGGLE_INACTIVE =
@@ -181,7 +183,7 @@ export function UploadButton({
       type="button"
       onClick={onClick}
       className={cn(
-        "w-full cursor-pointer border-2 border-dashed border-border rounded-lg py-6 flex flex-col items-center gap-2 text-muted-foreground transition-[border-color,background-color,transform,box-shadow,color] duration-200 hover:border-primary hover:bg-primary/5 hover:text-foreground hover:shadow-[var(--elevation-shadow-1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 active:scale-[0.99]",
+        "w-full cursor-pointer border-2 border-dashed border-border rounded-lg py-6 flex flex-col items-center gap-2 text-muted-foreground transition-[border-color,background-color,transform,box-shadow,color] duration-200 hover:border-primary hover:bg-primary/5 hover:text-foreground hover:shadow-[var(--elevation-shadow-1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 active:scale-[0.99] min-h-16 touch-manipulation",
         className
       )}
     >

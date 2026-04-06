@@ -43,26 +43,36 @@ export function DataTab({ card, textSideOptions, onChange }: DataTabProps) {
   return (
     <div className="px-5 py-5 flex flex-col gap-6">
       <SectionCard>
-        <Label className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-2">
+        <Label
+          htmlFor="card-name"
+          className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-2"
+        >
           <Type size={13} />
           Nombre
         </Label>
         <Input
+          id="card-name"
           placeholder=" Juan Cruz"
           value={card.name}
           onChange={(e) => onChange({ name: e.target.value.toUpperCase() })}
           className="cursor-pointer font-mono text-sm transition-shadow focus-visible:shadow-[0_0_0_3px_hsl(var(--primary)/0.2)]"
           maxLength={26}
+          autoComplete="name"
+          inputMode="text"
+          enterKeyHint="next"
+          autoCapitalize="characters"
         />
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <span className="text-[11px] text-muted-foreground uppercase tracking-wide">Mostrar en</span>
-          <SegmentedButtons
-            options={textSideOptions}
-            value={card.nameSide}
-            onChange={(value) => onChange({ nameSide: value })}
-            variant="pill"
-            className="flex gap-1.5"
-          />
+          <div role="group" aria-label="Mostrar nombre en">
+            <SegmentedButtons
+              options={textSideOptions}
+              value={card.nameSide}
+              onChange={(value) => onChange({ nameSide: value })}
+              variant="pill"
+              className="flex gap-1.5"
+            />
+          </div>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-[11px] text-muted-foreground uppercase tracking-wide">Color</span>
@@ -70,19 +80,22 @@ export function DataTab({ card, textSideOptions, onChange }: DataTabProps) {
             type="color"
             value={card.nameColor}
             onChange={(e) => onChange({ nameColor: e.target.value })}
-            className="w-7 h-7 rounded cursor-pointer border border-border transition-transform hover:scale-105 active:scale-95"
+            className="w-10 h-10 rounded cursor-pointer border border-border transition-transform hover:scale-105 active:scale-95 sm:w-8 sm:h-8 touch-manipulation"
             title="Color del nombre"
+            aria-label="Color del nombre"
           />
           <span className="font-mono text-xs text-foreground">
             {card.nameColor.toUpperCase()}
           </span>
           <span className="text-[11px] text-muted-foreground uppercase tracking-wide">Alineación</span>
-          <IconToggleGroup
-            options={ALIGN_OPTIONS}
-            value={card.nameAlign}
-            onChange={(value) => onChange({ nameAlign: value })}
-            className="flex gap-1.5"
-          />
+          <div role="group" aria-label="Alineación del nombre">
+            <IconToggleGroup
+              options={ALIGN_OPTIONS}
+              value={card.nameAlign}
+              onChange={(value) => onChange({ nameAlign: value })}
+              className="flex gap-1.5"
+            />
+          </div>
         </div>
         <LabeledSlider
           label={`Tamaño: ${card.nameFontSize}px`}
@@ -96,26 +109,35 @@ export function DataTab({ card, textSideOptions, onChange }: DataTabProps) {
       </SectionCard>
 
       <SectionCard>
-        <Label className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-2">
+        <Label
+          htmlFor="card-number"
+          className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-2"
+        >
           <CreditCard size={13} />
           Número
         </Label>
         <Input
+          id="card-number"
           placeholder="0000 0000 0000 0000"
           value={card.number}
           onChange={(e) => onChange({ number: formatCardNumber(e.target.value) })}
           className="cursor-pointer font-mono text-sm tracking-widest transition-shadow focus-visible:shadow-[0_0_0_3px_hsl(var(--primary)/0.2)]"
           maxLength={19}
+          autoComplete="cc-number"
+          inputMode="numeric"
+          enterKeyHint="next"
         />
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <span className="text-[11px] text-muted-foreground uppercase tracking-wide">Mostrar en</span>
-          <SegmentedButtons
-            options={textSideOptions}
-            value={card.numberSide}
-            onChange={(value) => onChange({ numberSide: value })}
-            variant="pill"
-            className="flex gap-1.5"
-          />
+          <div role="group" aria-label="Mostrar número en">
+            <SegmentedButtons
+              options={textSideOptions}
+              value={card.numberSide}
+              onChange={(value) => onChange({ numberSide: value })}
+              variant="pill"
+              className="flex gap-1.5"
+            />
+          </div>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-[11px] text-muted-foreground uppercase tracking-wide">Color</span>
@@ -123,29 +145,34 @@ export function DataTab({ card, textSideOptions, onChange }: DataTabProps) {
             type="color"
             value={card.numberColor}
             onChange={(e) => onChange({ numberColor: e.target.value })}
-            className="w-7 h-7 rounded cursor-pointer border border-border transition-transform hover:scale-105 active:scale-95"
+            className="w-10 h-10 rounded cursor-pointer border border-border transition-transform hover:scale-105 active:scale-95 sm:w-8 sm:h-8 touch-manipulation"
             title="Color del número"
+            aria-label="Color del número"
           />
           <span className="font-mono text-xs text-foreground">
             {card.numberColor.toUpperCase()}
           </span>
           <span className="text-[11px] text-muted-foreground uppercase tracking-wide">Alineación</span>
-          <IconToggleGroup
-            options={ALIGN_OPTIONS}
-            value={card.numberAlign}
-            onChange={(value) => onChange({ numberAlign: value })}
-            className="flex gap-1.5"
-          />
+          <div role="group" aria-label="Alineación del número">
+            <IconToggleGroup
+              options={ALIGN_OPTIONS}
+              value={card.numberAlign}
+              onChange={(value) => onChange({ numberAlign: value })}
+              className="flex gap-1.5"
+            />
+          </div>
         </div>
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <span className="text-[11px] text-muted-foreground uppercase tracking-wide">Dirección</span>
-          <SegmentedButtons
-            options={NUMBER_DIRECTION_OPTIONS}
-            value={card.numberDirection}
-            onChange={(value) => onChange({ numberDirection: value })}
-            variant="pill"
-            className="flex gap-1.5"
-          />
+          <div role="group" aria-label="Dirección del número">
+            <SegmentedButtons
+              options={NUMBER_DIRECTION_OPTIONS}
+              value={card.numberDirection}
+              onChange={(value) => onChange({ numberDirection: value })}
+              variant="pill"
+              className="flex gap-1.5"
+            />
+          </div>
         </div>
         <LabeledSlider
           label={`Tamaño: ${card.numberFontSize}px`}
@@ -159,7 +186,10 @@ export function DataTab({ card, textSideOptions, onChange }: DataTabProps) {
       </SectionCard>
 
       <SectionCard>
-        <Label className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-2">
+        <Label
+          id="typography-label"
+          className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-2"
+        >
           <Type size={13} />
           Tipografía
         </Label>
@@ -168,6 +198,8 @@ export function DataTab({ card, textSideOptions, onChange }: DataTabProps) {
         </span>
         <Select value={card.nameFont} onValueChange={handleTypographyChange}>
           <SelectTrigger
+            id="typography-select"
+            aria-labelledby="typography-label"
             className="w-full cursor-pointer transition-shadow focus-visible:shadow-[0_0_0_3px_hsl(var(--primary)/0.2)]"
             style={{ fontFamily: getFontFamily(card.nameFont) }}
           >
@@ -191,15 +223,18 @@ export function DataTab({ card, textSideOptions, onChange }: DataTabProps) {
         <button
           type="button"
           onClick={() => onChange({ showCardLabel: !card.showCardLabel })}
+          role="switch"
+          aria-checked={card.showCardLabel}
+          aria-label='Mostrar texto "SUBE"'
           className={cn(
-            "relative inline-flex h-5 w-9 cursor-pointer items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
+            "relative inline-flex h-7 w-12 cursor-pointer items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 sm:h-5 sm:w-9 touch-manipulation",
             card.showCardLabel ? "bg-primary" : "bg-muted"
           )}
         >
           <span
             className={cn(
-              "inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform",
-              card.showCardLabel ? "translate-x-4.5" : "translate-x-0.5"
+              "inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform sm:h-3.5 sm:w-3.5",
+              card.showCardLabel ? "translate-x-6 sm:translate-x-4.5" : "translate-x-1 sm:translate-x-0.5"
             )}
           />
         </button>
