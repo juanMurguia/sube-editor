@@ -21,6 +21,9 @@ export async function exportCardsPDF(
       // Force all elements to use rgb colors by ensuring no oklch/lab leaks in
       normalizeCloneColors(frontEl, cloned)
       normalizeCloneColors(backEl, cloned)
+      // Export without rounded corners; let people round against the plastic card
+      normalizeCloneLayout(frontEl, cloned)
+      normalizeCloneLayout(backEl, cloned)
     },
   }
 
@@ -58,7 +61,7 @@ export async function exportCardsPDF(
   pdf.addImage(frontData, "PNG", cardX, startY, CARD_W, CARD_H)
 
   // Dashed cut guide — front
-  drawDashedRect(pdf, cardX - 3, startY - 3, CARD_W + 6, CARD_H + 6, 3.5)
+  drawDashedRect(pdf, cardX - 3, startY - 3, CARD_W + 6, CARD_H + 6)
 
   // Label
   pdf.setFont("helvetica", "bold")
@@ -72,7 +75,7 @@ export async function exportCardsPDF(
   pdf.addImage(backData, "PNG", cardX, backY, CARD_W, CARD_H)
 
   // Dashed cut guide — back
-  drawDashedRect(pdf, cardX - 3, backY - 3, CARD_W + 6, CARD_H + 6, 3.5)
+  drawDashedRect(pdf, cardX - 3, backY - 3, CARD_W + 6, CARD_H + 6)
 
   // Label
   pdf.text("DORSO", cardX, backY - 5)
@@ -103,13 +106,12 @@ function drawDashedRect(
   x: number,
   y: number,
   w: number,
-  h: number,
-  r: number
+  h: number
 ) {
   pdf.setDrawColor(190, 190, 190)
   pdf.setLineWidth(0.2)
   pdf.setLineDashPattern([1.5, 1.5], 0)
-  pdf.roundedRect(x, y, w, h, r, r, "S")
+  pdf.rect(x, y, w, h, "S")
 }
 
 const COLOR_PROPS = [
@@ -155,6 +157,15 @@ function normalizeCloneColors(sourceRoot: HTMLElement, clonedDoc: Document) {
       cloneEl.style.setProperty(prop, fixed)
     }
   }
+}
+
+function normalizeCloneLayout(sourceRoot: HTMLElement, clonedDoc: Document) {
+  const cloneRoot = clonedDoc.querySelector<HTMLElement>(
+    `[data-card-side="${sourceRoot.dataset.cardSide}"]`
+  )
+  if (!cloneRoot) return
+
+  cloneRoot.style.borderRadius = "0px"
 }
 
 function replaceUnsupportedColors(value: string) {

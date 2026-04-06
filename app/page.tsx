@@ -56,7 +56,7 @@ export default function Home() {
 
       {/* Header */}
       <header className="border-b border-border bg-card sticky top-0 z-50 shadow-sm">
-        <div className="max-w-screen-xl mx-auto px-4 h-14 flex items-center justify-between">
+        <div className="max-w-screen-xl mx-auto px-4 h-14 grid grid-cols-[1fr_auto_1fr] items-center gap-4">
           <div>
             <h1 className="text-sm font-bold text-foreground font-serif leading-none">
               Mi SUBE Personalizada
@@ -66,7 +66,19 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <p className="text-xs text-muted-foreground text-center">
+            Made with ❤️ by{" "}
+            <a
+              href="https://devjuan.online"
+              target="_blank"
+              rel="noreferrer"
+              className="text-foreground hover:underline"
+            >
+              Juan Cruz
+            </a>
+          </p>
+
+          <div className="flex items-center gap-2 justify-end">
             <Button
               variant="ghost"
               size="sm"

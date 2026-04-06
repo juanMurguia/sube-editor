@@ -1,6 +1,7 @@
 import type { FontId } from "./font-options"
 
 export type CardSide = "front" | "back"
+export type TextSide = CardSide | "both"
 export type TextColor = "white" | "black" | "custom"
 export type TextAlign = "left" | "center" | "right"
 
@@ -32,8 +33,8 @@ export interface CardState {
   number: string
 
   // Which side shows name and number
-  nameSide: CardSide
-  numberSide: CardSide
+  nameSide: TextSide
+  numberSide: TextSide
 
   // Text appearance
   nameColor: string

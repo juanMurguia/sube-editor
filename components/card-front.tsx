@@ -33,8 +33,8 @@ const CardFront = forwardRef<HTMLDivElement, CardFrontProps>(
       numberDirection,
     } = card
 
-    const showName = nameSide === "front"
-    const showNumber = numberSide === "front"
+    const showName = nameSide === "front" || nameSide === "both"
+    const showNumber = numberSide === "front" || numberSide === "both"
     const isVertical = numberDirection === "vertical"
     const numberGroups = getCardNumberGroups(number)
     const nameFontFamily = getFontFamily(nameFont)
