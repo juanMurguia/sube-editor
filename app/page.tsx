@@ -7,13 +7,10 @@ import CardBack from "@/components/card-back"
 import EditorPanel from "@/components/editor-panel"
 import { Button } from "@/components/ui/button"
 import { Download, RefreshCw, RotateCcw } from "lucide-react"
-import { cn } from "@/lib/utils"
 
 export default function Home() {
   const [card, setCard] = useState<CardState>(defaultCardState)
   const [isExporting, setIsExporting] = useState(false)
-  const [previewSide, setPreviewSide] = useState<"front" | "back">("front")
-  const [showBothSides, setShowBothSides] = useState(true)
 
   const frontRef = useRef<HTMLDivElement>(null)
   const backRef = useRef<HTMLDivElement>(null)
@@ -53,18 +50,13 @@ export default function Home() {
       {/* Header */}
       <header className="border-b border-border bg-card sticky top-0 z-50 shadow-sm">
         <div className="max-w-screen-xl mx-auto px-4 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow">
-              <span className="text-primary-foreground font-black text-xs tracking-tight">SUBE</span>
-            </div>
-            <div>
-              <h1 className="text-sm font-bold text-foreground font-serif leading-none">
-                Mi SUBE Personalizada
-              </h1>
-              <p className="text-xs text-muted-foreground leading-none mt-0.5">
-                Diseñá y exportá tu tarjeta
-              </p>
-            </div>
+          <div>
+            <h1 className="text-sm font-bold text-foreground font-serif leading-none">
+              Mi SUBE Personalizada
+            </h1>
+            <p className="text-xs text-muted-foreground leading-none mt-0.5">
+              Diseñá y exportá tu tarjeta
+            </p>
           </div>
 
           <div className="flex items-center gap-2">
@@ -102,114 +94,41 @@ export default function Home() {
           <EditorPanel card={card} onChange={handleChange} />
         </aside>
 
-        {/* RIGHT: Preview area */}
-        <main className="flex-1 flex flex-col items-center justify-center p-6 lg:p-8 gap-6 overflow-auto">
+        {/* RIGHT: Preview area — always shows both sides */}
+        <main className="flex-1 flex flex-col items-center justify-center p-6 lg:p-8 gap-8 overflow-auto">
 
-          {/* Toggle buttons */}
-          <div className="flex items-center gap-3 flex-wrap justify-center">
-            <div className="flex rounded-lg overflow-hidden border border-border bg-card">
-              <button
-                onClick={() => setShowBothSides(true)}
-                className={cn(
-                  "px-3 py-1.5 text-xs font-medium transition-all",
-                  showBothSides
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                )}
-              >
-                Ambas caras
-              </button>
-              <button
-                onClick={() => { setShowBothSides(false); setPreviewSide("front") }}
-                className={cn(
-                  "px-3 py-1.5 text-xs font-medium transition-all",
-                  !showBothSides && previewSide === "front"
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                )}
-              >
-                Frente
-              </button>
-              <button
-                onClick={() => { setShowBothSides(false); setPreviewSide("back") }}
-                className={cn(
-                  "px-3 py-1.5 text-xs font-medium transition-all",
-                  !showBothSides && previewSide === "back"
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                )}
-              >
-                Dorso
-              </button>
-            </div>
-            <span className="text-xs text-muted-foreground hidden sm:block">
-              Vista previa del diseño
-            </span>
-          </div>
-
-          {/* Card previews */}
-          <div className={cn(
-            "flex items-center justify-center gap-8 flex-wrap",
-            showBothSides ? "flex-row" : "flex-col"
-          )}>
+          {/* Card previews — always both */}
+          <div className="flex items-center justify-center gap-8 flex-wrap">
 
             {/* Front preview */}
-            {(showBothSides || previewSide === "front") && (
-              <div className="flex flex-col items-center gap-3">
-                <div className="flex items-center gap-2">
-                  <span className={cn(
-                    "text-xs font-semibold uppercase tracking-wider px-2 py-0.5 rounded",
-                    card.activeSide === "front"
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground"
-                  )}>
-                    Frente
-                  </span>
-                  {card.activeSide === "front" && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-                  )}
-                </div>
-                <CardFront
-                  ref={frontRef}
-                  card={card}
-                  scale={1}
-                />
-                <p className="text-xs text-muted-foreground">85.6 × 54 mm</p>
+            <div className="flex flex-col items-center gap-3">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold uppercase tracking-wider px-2 py-0.5 rounded bg-primary/10 text-primary">
+                  Frente
+                </span>
               </div>
-            )}
+              <CardFront
+                ref={frontRef}
+                card={card}
+                scale={1}
+              />
+              <p className="text-xs text-muted-foreground">85.6 × 54 mm</p>
+            </div>
 
             {/* Back preview */}
-            {(showBothSides || previewSide === "back") && (
-              <div className="flex flex-col items-center gap-3">
-                <div className="flex items-center gap-2">
-                  <span className={cn(
-                    "text-xs font-semibold uppercase tracking-wider px-2 py-0.5 rounded",
-                    card.activeSide === "back"
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground"
-                  )}>
-                    Dorso
-                  </span>
-                  {card.activeSide === "back" && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-                  )}
-                </div>
-                <CardBack
-                  ref={backRef}
-                  card={card}
-                  scale={1}
-                />
-                <p className="text-xs text-muted-foreground">Incluye banda magnética</p>
+            <div className="flex flex-col items-center gap-3">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold uppercase tracking-wider px-2 py-0.5 rounded bg-primary/10 text-primary">
+                  Dorso
+                </span>
               </div>
-            )}
-          </div>
-
-          {/* Info badge */}
-          <div className="max-w-md w-full bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
-            <span className="text-lg leading-none mt-0.5">💡</span>
-            <p className="text-xs text-amber-800 leading-relaxed">
-              <strong>Acordate de pedir que te lo impriman en papel autoadhesivo</strong>, así lo podés pegar fácil :) El PDF viene con guías de corte para que sea más fácil recortar.
-            </p>
+              <CardBack
+                ref={backRef}
+                card={card}
+                scale={1}
+              />
+              <p className="text-xs text-muted-foreground">Incluye banda magnética</p>
+            </div>
           </div>
 
           {/* Export CTA */}
@@ -228,7 +147,7 @@ export default function Home() {
           </Button>
 
           <p className="text-xs text-muted-foreground text-center max-w-xs">
-            El PDF incluye frente y dorso en tamaño A4, con guías de corte y el recordatorio para imprimir en papel autoadhesivo.
+            El PDF incluye frente y dorso en tamaño A4 con guías de corte.
           </p>
         </main>
       </div>

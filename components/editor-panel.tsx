@@ -19,6 +19,8 @@ import {
   Type,
   CreditCard,
   Layers,
+  AlignHorizontalDistributeCenter,
+  AlignVerticalDistributeCenter,
 } from "lucide-react"
 
 interface EditorPanelProps {
@@ -198,6 +200,7 @@ export default function EditorPanel({ card, onChange }: EditorPanelProps) {
                 className="w-7 h-7 rounded cursor-pointer border border-border"
                 title="Color del nombre"
               />
+              <span className="font-mono text-xs text-foreground">{card.nameColor.toUpperCase()}</span>
               <span className="text-xs text-muted-foreground">Alineación:</span>
               <div className="flex gap-1">
                 {alignOptions.map((a) => (
@@ -269,6 +272,7 @@ export default function EditorPanel({ card, onChange }: EditorPanelProps) {
                 className="w-7 h-7 rounded cursor-pointer border border-border"
                 title="Color del número"
               />
+              <span className="font-mono text-xs text-foreground">{card.numberColor.toUpperCase()}</span>
               <span className="text-xs text-muted-foreground">Alineación:</span>
               <div className="flex gap-1">
                 {alignOptions.map((a) => (
@@ -283,6 +287,31 @@ export default function EditorPanel({ card, onChange }: EditorPanelProps) {
                     {a.icon}
                   </button>
                 ))}
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">Dirección:</span>
+              <div className="flex gap-1">
+                <button
+                  onClick={() => onChange({ numberDirection: "horizontal" })}
+                  className={cn(
+                    "flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-all",
+                    card.numberDirection === "horizontal" ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground hover:bg-muted"
+                  )}
+                >
+                  <AlignHorizontalDistributeCenter size={12} />
+                  Horizontal
+                </button>
+                <button
+                  onClick={() => onChange({ numberDirection: "vertical" })}
+                  className={cn(
+                    "flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-all",
+                    card.numberDirection === "vertical" ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground hover:bg-muted"
+                  )}
+                >
+                  <AlignVerticalDistributeCenter size={12} />
+                  Vertical
+                </button>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -339,7 +368,7 @@ export default function EditorPanel({ card, onChange }: EditorPanelProps) {
                 }
                 className="w-10 h-10 rounded-lg cursor-pointer border border-border"
               />
-              <span className="font-mono text-sm text-foreground">{design.bgColor}</span>
+              <span className="font-mono text-sm text-foreground">{design.bgColor.toUpperCase()}</span>
             </div>
           </div>
 

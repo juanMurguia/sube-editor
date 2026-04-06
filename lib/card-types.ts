@@ -39,6 +39,7 @@ export interface CardState {
   numberAlign: TextAlign
   nameFontSize: number
   numberFontSize: number
+  numberDirection: "horizontal" | "vertical"
 
   // Show card label ("SUBE" text / logo)
   showCardLabel: boolean
@@ -64,6 +65,7 @@ export const defaultCardState: CardState = {
   numberAlign: "left",
   nameFontSize: 14,
   numberFontSize: 13,
+  numberDirection: "horizontal",
   showCardLabel: true,
   front: {
     bgColor: "#1a56db",

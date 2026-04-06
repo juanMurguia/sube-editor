@@ -11,10 +11,24 @@ interface CardBackProps {
 
 const CardBack = forwardRef<HTMLDivElement, CardBackProps>(
   ({ card, scale = 1, forExport = false }, ref) => {
-    const { back, name, number, nameSide, numberSide, nameColor, numberColor, nameAlign, numberAlign, nameFontSize, numberFontSize } = card
+    const {
+      back,
+      name,
+      number,
+      nameSide,
+      numberSide,
+      nameColor,
+      numberColor,
+      nameAlign,
+      numberAlign,
+      nameFontSize,
+      numberFontSize,
+      numberDirection,
+    } = card
 
     const showName = nameSide === "back"
     const showNumber = numberSide === "back"
+    const isVertical = numberDirection === "vertical"
 
     const w = 342 * scale
     const h = 216 * scale
@@ -38,14 +52,15 @@ const CardBack = forwardRef<HTMLDivElement, CardBackProps>(
           userSelect: "none",
         }}
       >
-        {/* Background image */}
+        {/* Background image — z-index 0, covers full card including behind magnetic band */}
         {back.bgImage && (
           <div
             style={{
               position: "absolute",
               inset: 0,
+              zIndex: 0,
               backgroundImage: `url(${back.bgImage})`,
-              backgroundSize: back.bgImageFit === "fill" ? "100% 100%" : back.bgImageFit,
+              backgroundSize: "cover",
               backgroundPosition: "center",
               backgroundRepeat: "no-repeat",
               opacity: back.bgImageOpacity,
@@ -53,7 +68,7 @@ const CardBack = forwardRef<HTMLDivElement, CardBackProps>(
           />
         )}
 
-        {/* Overlay images */}
+        {/* Overlay images — behind magnetic band */}
         {back.images.map((img) => (
           <div
             key={img.id}
@@ -63,6 +78,7 @@ const CardBack = forwardRef<HTMLDivElement, CardBackProps>(
               top: img.y * scale,
               width: img.width * scale,
               height: img.height * scale,
+              zIndex: 1,
               opacity: img.opacity,
               backgroundImage: `url(${img.src})`,
               backgroundSize: "contain",
@@ -77,12 +93,13 @@ const CardBack = forwardRef<HTMLDivElement, CardBackProps>(
           style={{
             position: "absolute",
             inset: 0,
-            background: "linear-gradient(135deg, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.25) 100%)",
+            zIndex: 2,
+            background: "linear-gradient(135deg, rgba(0,0,0,0.06) 0%, rgba(0,0,0,0.22) 100%)",
             pointerEvents: "none",
           }}
         />
 
-        {/* MAGNETIC BAND */}
+        {/* MAGNETIC BAND — always on top of everything */}
         <div
           style={{
             position: "absolute",
@@ -90,19 +107,20 @@ const CardBack = forwardRef<HTMLDivElement, CardBackProps>(
             left: 0,
             right: 0,
             height: magneticBandHeight,
-            background: "linear-gradient(180deg, #1a1a1a 0%, #0d0d0d 40%, #2a2a2a 100%)",
             zIndex: 10,
+            background: "linear-gradient(180deg, #1c1c1c 0%, #0a0a0a 45%, #252525 100%)",
           }}
         >
-          {/* Magnetic band shimmer */}
+          {/* Metallic sheen */}
           <div
             style={{
               position: "absolute",
               inset: 0,
-              background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.04) 30%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 70%, transparent 100%)",
+              background:
+                "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.07) 50%, rgba(255,255,255,0.03) 75%, transparent 100%)",
             }}
           />
-          {/* Band label */}
+          {/* Micro text */}
           <div
             style={{
               position: "absolute",
@@ -110,7 +128,7 @@ const CardBack = forwardRef<HTMLDivElement, CardBackProps>(
               top: "50%",
               transform: "translateY(-50%)",
               fontSize: 5 * scale,
-              color: "rgba(255,255,255,0.2)",
+              color: "rgba(255,255,255,0.15)",
               fontFamily: "monospace",
               letterSpacing: "0.1em",
               textTransform: "uppercase",
@@ -120,78 +138,35 @@ const CardBack = forwardRef<HTMLDivElement, CardBackProps>(
           </div>
         </div>
 
-        {/* Bottom content area */}
-        {/* Signature strip */}
-        <div
-          style={{
-            position: "absolute",
-            top: magneticBandTop + magneticBandHeight + 12 * scale,
-            left: 18 * scale,
-            right: 90 * scale,
-            height: 28 * scale,
-            background: "repeating-linear-gradient(90deg, #e8e8e8 0px, #f4f4f4 2px, #e8e8e8 4px)",
-            borderRadius: 3 * scale,
-            zIndex: 5,
-            display: "flex",
-            alignItems: "center",
-            paddingLeft: 8 * scale,
-            overflow: "hidden",
-          }}
-        >
-          {showName && (
-            <span
-              style={{
-                fontFamily: "var(--font-space-grotesk, 'Space Grotesk', sans-serif)",
-                fontWeight: 600,
-                fontSize: nameFontSize * scale * 0.85,
-                color: "#1a1a1a",
-                textTransform: "uppercase",
-                letterSpacing: "0.06em",
-                textAlign: nameAlign,
-                width: "100%",
-                display: "block",
-              }}
-            >
-              {card.name || "TU NOMBRE"}
-            </span>
-          )}
-        </div>
-
-        {/* CVV box */}
-        <div
-          style={{
-            position: "absolute",
-            top: magneticBandTop + magneticBandHeight + 12 * scale,
-            right: 18 * scale,
-            width: 64 * scale,
-            height: 28 * scale,
-            background: "rgba(255,255,255,0.15)",
-            borderRadius: 3 * scale,
-            border: "1px solid rgba(255,255,255,0.3)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 5,
-          }}
-        >
-          <span style={{
-            fontFamily: "'Courier New', monospace",
-            fontSize: 10 * scale,
-            color: "rgba(255,255,255,0.8)",
-            letterSpacing: "0.1em",
-          }}>
-            CVV
-          </span>
-        </div>
-
-        {/* Card number on back (if user chose back) */}
-        {showNumber && (
+        {/* SUBE label bottom-right */}
+        {card.showCardLabel && (
           <div
             style={{
               position: "absolute",
-              bottom: 16 * scale,
+              bottom: 14 * scale,
+              right: 18 * scale,
+              zIndex: 5,
+              fontFamily: "var(--font-space-grotesk, 'Space Grotesk', sans-serif)",
+              fontWeight: 800,
+              fontSize: 12 * scale,
+              letterSpacing: "0.1em",
+              color: "rgba(255,255,255,0.7)",
+              textShadow: "0 1px 3px rgba(0,0,0,0.4)",
+            }}
+          >
+            SUBE
+          </div>
+        )}
+
+        {/* Card number on back — horizontal */}
+        {showNumber && !isVertical && (
+          <div
+            style={{
+              position: "absolute",
+              bottom: showName ? 44 * scale : 22 * scale,
               left: 18 * scale,
               right: 18 * scale,
+              zIndex: 5,
               fontFamily: "'Courier New', monospace",
               fontWeight: 600,
               fontSize: numberFontSize * scale,
@@ -201,26 +176,53 @@ const CardBack = forwardRef<HTMLDivElement, CardBackProps>(
               textShadow: "0 1px 3px rgba(0,0,0,0.5)",
             }}
           >
-            {card.number || "0000 0000 0000 0000"}
+            {number || "0000 0000 0000 0000"}
           </div>
         )}
 
-        {/* SUBE label bottom-right */}
-        {card.showCardLabel && (
+        {/* Card number on back — vertical */}
+        {showNumber && isVertical && (
           <div
             style={{
               position: "absolute",
-              bottom: 14 * scale,
-              right: 18 * scale,
-              fontFamily: "var(--font-space-grotesk, 'Space Grotesk', sans-serif)",
-              fontWeight: 800,
-              fontSize: 12 * scale,
-              letterSpacing: "0.1em",
-              color: "rgba(255,255,255,0.6)",
-              textShadow: "0 1px 3px rgba(0,0,0,0.4)",
+              left: 18 * scale,
+              top: "50%",
+              transform: "translateY(-50%) rotate(-90deg)",
+              transformOrigin: "center center",
+              zIndex: 5,
+              fontFamily: "'Courier New', monospace",
+              fontWeight: 600,
+              fontSize: numberFontSize * scale,
+              letterSpacing: "0.18em",
+              color: numberColor,
+              textShadow: "0 1px 3px rgba(0,0,0,0.5)",
+              whiteSpace: "nowrap",
             }}
           >
-            SUBE
+            {number || "0000 0000 0000 0000"}
+          </div>
+        )}
+
+        {/* Card name on back */}
+        {showName && (
+          <div
+            style={{
+              position: "absolute",
+              bottom: 16 * scale,
+              left: 18 * scale,
+              right: 18 * scale,
+              zIndex: 5,
+              fontFamily: "var(--font-space-grotesk, 'Space Grotesk', sans-serif)",
+              fontWeight: 600,
+              fontSize: nameFontSize * scale,
+              letterSpacing: "0.08em",
+              color: nameColor,
+              textAlign: nameAlign,
+              textShadow: "0 1px 3px rgba(0,0,0,0.5)",
+              textTransform: "uppercase",
+            }}
+          >
+            {name || "TU NOMBRE"}
           </div>
         )}
       </div>

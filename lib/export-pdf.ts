@@ -16,6 +16,18 @@ export async function exportCardsPDF(
     allowTaint: true,
     backgroundColor: null,
     logging: false,
+    // Override oklch/lab colors that html2canvas can't parse
+    onclone: (cloned: Document) => {
+      // Force all elements to use rgb colors by ensuring no oklch/lab leaks in
+      const allEls = cloned.querySelectorAll<HTMLElement>("*")
+      allEls.forEach((el) => {
+        const computed = window.getComputedStyle(el)
+        const bg = computed.backgroundColor
+        if (bg && (bg.includes("oklch") || bg.includes("lab"))) {
+          el.style.backgroundColor = "transparent"
+        }
+      })
+    },
   }
 
   const frontCanvas = await html2canvas(frontEl, opts)
@@ -33,13 +45,13 @@ export async function exportCardsPDF(
   const cardX = (A4_W - CARD_W) / 2
 
   // Gap between front and back
-  const gap = 20
+  const gap = 18
 
   // Total height of both cards + gap
   const totalH = CARD_H * 2 + gap
 
-  // Vertical start (centered in A4)
-  const startY = (A4_H - totalH) / 2
+  // Vertical start (centered in A4, shifted up slightly to leave room for badge)
+  const startY = (A4_H - totalH) / 2 - 16
 
   const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" })
 
@@ -47,75 +59,70 @@ export async function exportCardsPDF(
   pdf.setFillColor(255, 255, 255)
   pdf.rect(0, 0, A4_W, A4_H, "F")
 
-  // Front card
+  // ── FRONT CARD ──
   const frontData = frontCanvas.toDataURL("image/png")
   pdf.addImage(frontData, "PNG", cardX, startY, CARD_W, CARD_H)
 
-  // Label "FRENTE"
+  // Dashed cut guide — front
+  drawDashedRect(pdf, cardX - 3, startY - 3, CARD_W + 6, CARD_H + 6, 3.5)
+
+  // Label
   pdf.setFont("helvetica", "bold")
-  pdf.setFontSize(7)
-  pdf.setTextColor(150, 150, 150)
-  pdf.text("FRENTE", cardX, startY - 2)
+  pdf.setFontSize(6.5)
+  pdf.setTextColor(160, 160, 160)
+  pdf.text("FRENTE", cardX, startY - 5)
 
-  // Back card
+  // ── BACK CARD ──
+  const backY = startY + CARD_H + gap
   const backData = backCanvas.toDataURL("image/png")
-  pdf.addImage(backData, "PNG", cardX, startY + CARD_H + gap, CARD_W, CARD_H)
+  pdf.addImage(backData, "PNG", cardX, backY, CARD_W, CARD_H)
 
-  // Label "DORSO"
-  pdf.text("DORSO", cardX, startY + CARD_H + gap - 2)
+  // Dashed cut guide — back
+  drawDashedRect(pdf, cardX - 3, backY - 3, CARD_W + 6, CARD_H + 6, 3.5)
 
-  // Dashed cut guides around both cards
-  pdf.setDrawColor(180, 180, 180)
-  pdf.setLineWidth(0.2)
-  pdf.setLineDashPattern([2, 2], 0)
+  // Label
+  pdf.text("DORSO", cardX, backY - 5)
 
-  // Front card guide
-  drawDashedRect(pdf, cardX - 2, startY - 2, CARD_W + 4, CARD_H + 4, 3)
-  // Back card guide
-  drawDashedRect(pdf, cardX - 2, startY + CARD_H + gap - 2, CARD_W + 4, CARD_H + 4, 3)
-
-  // Small scissors icons on corners
-  pdf.setFontSize(8)
-  pdf.setTextColor(180, 180, 180)
-  pdf.text("✂", cardX - 5, startY - 2)
-  pdf.text("✂", cardX - 5, startY + CARD_H + gap - 2)
-
-  // INFOGRAPHY BADGE at the bottom
-  const badgeY = startY + totalH + 16
-  const badgeW = 140
-  const badgeH = 22
+  // ── INFOGRAPHY BADGE ──
+  const badgeW = 150
+  const badgeH = 26
   const badgeX = (A4_W - badgeW) / 2
+  const badgeY = backY + CARD_H + 14
 
   pdf.setLineDashPattern([], 0)
-  pdf.setFillColor(255, 248, 220)
-  pdf.setDrawColor(230, 180, 60)
-  pdf.setLineWidth(0.5)
+  pdf.setFillColor(255, 249, 219)
+  pdf.setDrawColor(210, 165, 40)
+  pdf.setLineWidth(0.4)
   pdf.roundedRect(badgeX, badgeY, badgeW, badgeH, 3, 3, "FD")
 
-  // Badge icon
-  pdf.setFontSize(10)
-  pdf.setTextColor(180, 120, 0)
-  pdf.text("💡", badgeX + 4, badgeY + 8)
+  // Badge icon (lightbulb represented with text)
+  pdf.setFont("helvetica", "bold")
+  pdf.setFontSize(9)
+  pdf.setTextColor(150, 100, 0)
+  pdf.text("!", badgeX + 5, badgeY + 9)
 
-  // Badge text - split into two lines
-  pdf.setFont("helvetica", "normal")
-  pdf.setFontSize(7)
-  pdf.setTextColor(120, 80, 0)
+  // Badge main text
+  pdf.setFont("helvetica", "bold")
+  pdf.setFontSize(7.5)
+  pdf.setTextColor(100, 65, 0)
   pdf.text(
     "Acordate de pedir que te lo impriman en papel autoadhesivo,",
     badgeX + 12,
-    badgeY + 8
+    badgeY + 9
   )
+  pdf.setFont("helvetica", "normal")
+  pdf.setFontSize(7.5)
   pdf.text(
-    "así lo podés pegar fácil :)",
+    "asi lo podes pegar facil :)",
     badgeX + 12,
-    badgeY + 15
+    badgeY + 17
   )
 
-  // Footer
-  pdf.setFontSize(6)
+  // ── FOOTER ──
+  pdf.setFont("helvetica", "normal")
+  pdf.setFontSize(5.5)
   pdf.setTextColor(200, 200, 200)
-  pdf.text("Diseñado con Mi SUBE Personalizada", A4_W / 2, A4_H - 8, { align: "center" })
+  pdf.text("Diseñado con Mi SUBE Personalizada", A4_W / 2, A4_H - 7, { align: "center" })
 
   pdf.save("mi-sube-personalizada.pdf")
 }
@@ -128,7 +135,7 @@ function drawDashedRect(
   h: number,
   r: number
 ) {
-  pdf.setDrawColor(180, 180, 180)
+  pdf.setDrawColor(190, 190, 190)
   pdf.setLineWidth(0.2)
   pdf.setLineDashPattern([1.5, 1.5], 0)
   pdf.roundedRect(x, y, w, h, r, r, "S")
