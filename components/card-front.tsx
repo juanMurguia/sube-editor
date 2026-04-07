@@ -39,6 +39,12 @@ const CardFront = forwardRef<HTMLDivElement, CardFrontProps>(
     const numberGroups = getCardNumberGroups(number)
     const nameFontFamily = getFontFamily(nameFont)
     const numberFontFamily = getFontFamily(numberFont)
+    const numberAlignItems =
+      numberAlign === "left"
+        ? "flex-start"
+        : numberAlign === "center"
+          ? "center"
+          : "flex-end"
 
     const baseW = 342
     const baseH = 216
@@ -170,13 +176,17 @@ const CardFront = forwardRef<HTMLDivElement, CardFrontProps>(
               textShadow: "0 1px 3px rgba(0,0,0,0.5)",
               display: "flex",
               flexDirection: "column",
+              alignItems: numberAlignItems,
               gap: 6 * scale,
               textAlign: numberAlign,
               minWidth: 84 * scale,
             }}
           >
             {numberGroups.map((group, index) => (
-              <div key={`${group}-${index}`} style={{ lineHeight: 1 }}>
+              <div
+                key={`${group}-${index}`}
+                style={{ lineHeight: 1, width: "100%" }}
+              >
                 {group}
               </div>
             ))}

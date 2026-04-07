@@ -18,6 +18,7 @@ import {
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
   type TouchEvent,
@@ -31,10 +32,12 @@ export default function Home() {
   const [pullDistance, setPullDistance] = useState(0);
   const [isRefreshingPreview, setIsRefreshingPreview] = useState(false);
   const [previewKey, setPreviewKey] = useState(0);
+  const [previewScale, setPreviewScale] = useState(1);
 
   const frontRef = useRef<HTMLDivElement>(null);
   const backRef = useRef<HTMLDivElement>(null);
   const mainScrollRef = useRef<HTMLDivElement>(null);
+  const previewWrapRef = useRef<HTMLDivElement>(null);
   const touchStartRef = useRef({ x: 0, y: 0 });
   const lastDeltaRef = useRef({ x: 0, y: 0 });
 
@@ -76,6 +79,54 @@ export default function Home() {
       setActivePreview("front");
       setPullDistance(0);
     }
+  }, [isMobile]);
+
+  useLayoutEffect(() => {
+    if (!isMobile) {
+      setPreviewScale(1);
+      return;
+    }
+
+    const CARD_BASE_WIDTH = 342;
+    const CARD_BASE_HEIGHT = 216;
+    const VERTICAL_CHROME = 64;
+    const HORIZONTAL_GUTTER = 16;
+
+    const updateScale = () => {
+      const wrap = previewWrapRef.current;
+      if (!wrap) return;
+
+      const availableWidth = Math.max(0, wrap.clientWidth - HORIZONTAL_GUTTER);
+      const availableHeight = Math.max(0, wrap.clientHeight - VERTICAL_CHROME);
+      if (availableWidth === 0 || availableHeight === 0) return;
+
+      const widthScale = availableWidth / CARD_BASE_WIDTH;
+      const heightScale = availableHeight / CARD_BASE_HEIGHT;
+      const nextScale = Math.min(1, widthScale, heightScale);
+
+      if (Number.isFinite(nextScale)) {
+        setPreviewScale(nextScale);
+      }
+    };
+
+    updateScale();
+
+    const wrap = previewWrapRef.current;
+    let resizeObserver: ResizeObserver | null = null;
+
+    if (wrap && typeof ResizeObserver !== "undefined") {
+      resizeObserver = new ResizeObserver(() => {
+        updateScale();
+      });
+      resizeObserver.observe(wrap);
+    }
+
+    window.addEventListener("resize", updateScale);
+
+    return () => {
+      window.removeEventListener("resize", updateScale);
+      resizeObserver?.disconnect();
+    };
   }, [isMobile]);
 
   const handlePreviewTouchStart = useCallback(
@@ -271,7 +322,10 @@ export default function Home() {
       {/* Main content */}
       <div className="flex-1 flex flex-col lg:flex-row overflow-hidden min-h-0 ">
         {/* LEFT: Editor panel */}
-        <aside className="w-full lg:w-96 xl:w-md 2xl:w-120 border-b lg:border-b-0 lg:border-r border-border bg-card elev-level-1 flex flex-col overflow-y-auto overscroll-contain max-h-[50svh] sm:max-h-[45svh] lg:max-h-none lg:h-full min-h-0">
+        <aside className="fixed bottom-20 left-3 right-3 z-40 flex flex-col max-h-[55svh] rounded-[28px] border border-border/70 bg-card/95 shadow-[0_-18px_40px_rgba(2,6,13,0.18)] backdrop-blur supports-[backdrop-filter]:bg-card/90 overflow-hidden sm:static sm:inset-auto sm:z-auto sm:w-full lg:w-96 xl:w-md 2xl:w-120 sm:max-h-[45svh] lg:max-h-none lg:h-full sm:rounded-none sm:border-t-0 sm:border-x-0 sm:border-b sm:border-border lg:border-b-0 lg:border-r sm:bg-card sm:shadow-none sm:backdrop-blur-0 sm:overflow-y-auto sm:overscroll-contain sm:elev-level-1 min-h-0">
+          <div className="sm:hidden flex items-center justify-center pt-2">
+            <span className="h-1.5 w-10 rounded-full bg-muted-foreground/30" />
+          </div>
           <EditorPanel card={card} onChange={handleChange} />
         </aside>
 
@@ -282,7 +336,7 @@ export default function Home() {
           className=" flex-1 flex flex-col items-center justify-start lg:justify-center p-5 pb-24 sm:p-6 sm:pb-6 lg:p-8 gap-6 overflow-y-auto lg:overflow-hidden  "
           aria-labelledby="preview-title"
         >
-          <div className="w-full max-w-5xl flex flex-col items-center gap-4">
+          <div className="w-full max-w-5xl flex flex-col items-center gap-4 flex-1 min-h-0">
             <div className="flex items-end justify-between gap-4 w-full">
               {!isMobile && (
                 <div className="w-full text-center">
@@ -301,7 +355,8 @@ export default function Home() {
             </div>
 
             <div
-              className="relative w-full flex items-center justify-center touch-pan-y"
+              ref={previewWrapRef}
+              className="relative w-full flex-1 min-h-0 flex items-center justify-center touch-pan-y"
               onTouchStart={handlePreviewTouchStart}
               onTouchMove={handlePreviewTouchMove}
               onTouchEnd={handlePreviewTouchEnd}
@@ -378,7 +433,11 @@ export default function Home() {
                     Frente
                   </h3>
                   <div className="transition-transform duration-200 ease-out hover:scale-[1.02] will-change-transform [--card-shadow:0_18px_50px_rgba(0,0,0,0.25)] hover:[--card-shadow:0_26px_70px_rgba(0,0,0,0.38)]">
-                    <CardFront ref={frontRef} card={card} scale={1} />
+                    <CardFront
+                      ref={frontRef}
+                      card={card}
+                      scale={isMobile ? previewScale : 1}
+                    />
                   </div>
                 </section>
 
@@ -398,7 +457,11 @@ export default function Home() {
                     Dorso
                   </h3>
                   <div className="transition-transform duration-200 ease-out hover:scale-[1.02] will-change-transform [--card-shadow:0_18px_50px_rgba(0,0,0,0.25)] hover:[--card-shadow:0_26px_70px_rgba(0,0,0,0.38)]">
-                    <CardBack ref={backRef} card={card} scale={1} />
+                    <CardBack
+                      ref={backRef}
+                      card={card}
+                      scale={isMobile ? previewScale : 1}
+                    />
                   </div>
                   <p className="text-xs text-muted-foreground">
                     Incluye banda magnética
