@@ -390,13 +390,6 @@ export default function Home() {
           aria-labelledby="preview-title-mobile"
         >
           <section className="sticky top-0 z-30 border-b border-border/60 bg-background/95 px-3 pt-3 pb-3 backdrop-blur supports-[backdrop-filter]:bg-background/90">
-            <h2
-              id="preview-title-mobile"
-              className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground text-center"
-            >
-              Vista previa
-            </h2>
-
             <div className="mt-2 grid grid-cols-2 gap-2">
               <Button
                 type="button"
@@ -420,7 +413,7 @@ export default function Home() {
 
             <div
               ref={previewWrapRef}
-              className="relative mt-2 h-[258px] w-full rounded-2xl border border-border/70 bg-card/55 px-2 py-2"
+              className="relative mt-2 h-[258px] w-full "
             >
               <div className="flex h-full items-center justify-center">
                 <section
@@ -466,9 +459,6 @@ export default function Home() {
                 </section>
               </div>
             </div>
-            <p className="pt-2 text-sm text-center text-muted-foreground">
-              La exportación siempre incluye frente y dorso.
-            </p>
           </section>
 
           <aside className="px-3 py-3">
