@@ -45,6 +45,8 @@ export default function Home() {
 
   const frontRef = useRef<HTMLDivElement>(null);
   const backRef = useRef<HTMLDivElement>(null);
+  const exportFrontRef = useRef<HTMLDivElement>(null);
+  const exportBackRef = useRef<HTMLDivElement>(null);
   const previewWrapRef = useRef<HTMLDivElement>(null);
   const saveTimeoutRef = useRef<number | null>(null);
 
@@ -61,12 +63,12 @@ export default function Home() {
   );
 
   const handleExport = useCallback(async () => {
-    if (!frontRef.current || !backRef.current) return;
+    if (!exportFrontRef.current || !exportBackRef.current) return;
 
     setIsExporting(true);
     try {
       const { exportCardsPDF } = await import("@/lib/export-pdf");
-      await exportCardsPDF(frontRef.current, backRef.current, card);
+      await exportCardsPDF(exportFrontRef.current, exportBackRef.current, card);
       toast({
         title: "PDF listo",
         description: "Se generaron frente y dorso correctamente.",
@@ -534,6 +536,25 @@ export default function Home() {
           </main>
         </div>
       )}
+
+      <div
+        aria-hidden="true"
+        style={{
+          position: "fixed",
+          left: 0,
+          top: 0,
+          transform: "translateX(-200vw)",
+          pointerEvents: "none",
+          opacity: 0,
+          zIndex: -1,
+          display: "flex",
+          flexDirection: "column",
+          gap: 24,
+        }}
+      >
+        <CardFront ref={exportFrontRef} card={card} scale={1} forExport />
+        <CardBack ref={exportBackRef} card={card} scale={1} forExport />
+      </div>
     </div>
   );
 }
