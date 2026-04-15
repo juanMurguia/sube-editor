@@ -21,6 +21,9 @@ export async function exportCardsPDF(
       // Force all elements to use rgb colors by ensuring no oklch/lab leaks in
       normalizeCloneColors(frontEl, cloned)
       normalizeCloneColors(backEl, cloned)
+      // html2canvas can crash on some computed gradient stops (non-finite offsets)
+      normalizeCloneGradients(frontEl, cloned)
+      normalizeCloneGradients(backEl, cloned)
       // Export without rounded corners; let people round against the plastic card
       normalizeCloneLayout(frontEl, cloned)
       normalizeCloneLayout(backEl, cloned)
@@ -29,6 +32,8 @@ export async function exportCardsPDF(
 
   const frontCanvas = await html2canvas(frontEl, opts)
   const backCanvas = await html2canvas(backEl, opts)
+  assertCanvasRenderable(frontCanvas, "frente")
+  assertCanvasRenderable(backCanvas, "dorso")
 
   // A4 dimensions in mm
   const A4_W = 210
@@ -57,8 +62,8 @@ export async function exportCardsPDF(
   pdf.rect(0, 0, A4_W, A4_H, "F")
 
   // ── FRONT CARD ──
-  const frontData = frontCanvas.toDataURL("image/png")
-  pdf.addImage(frontData, "PNG", cardX, startY, CARD_W, CARD_H)
+  const frontData = canvasToImageData(frontCanvas)
+  pdf.addImage(frontData.dataUrl, frontData.format, cardX, startY, CARD_W, CARD_H)
 
   // Dashed cut guide — front
   drawDashedRect(pdf, cardX - 3, startY - 3, CARD_W + 6, CARD_H + 6)
@@ -71,8 +76,8 @@ export async function exportCardsPDF(
 
   // ── BACK CARD ──
   const backY = startY + CARD_H + gap
-  const backData = backCanvas.toDataURL("image/png")
-  pdf.addImage(backData, "PNG", cardX, backY, CARD_W, CARD_H)
+  const backData = canvasToImageData(backCanvas)
+  pdf.addImage(backData.dataUrl, backData.format, cardX, backY, CARD_W, CARD_H)
 
   // Dashed cut guide — back
   drawDashedRect(pdf, cardX - 3, backY - 3, CARD_W + 6, CARD_H + 6)
@@ -112,6 +117,29 @@ function drawDashedRect(
   pdf.setLineWidth(0.2)
   pdf.setLineDashPattern([1.5, 1.5], 0)
   pdf.rect(x, y, w, h, "S")
+}
+
+function assertCanvasRenderable(canvas: HTMLCanvasElement, side: "frente" | "dorso") {
+  if (!canvas || canvas.width <= 0 || canvas.height <= 0) {
+    throw new Error(`No se pudo renderizar el ${side} para exportar.`)
+  }
+}
+
+function canvasToImageData(canvas: HTMLCanvasElement): {
+  dataUrl: string
+  format: "PNG" | "JPEG"
+} {
+  const png = canvas.toDataURL("image/png")
+  if (png.startsWith("data:image/png;base64,")) {
+    return { dataUrl: png, format: "PNG" }
+  }
+
+  const jpeg = canvas.toDataURL("image/jpeg", 0.98)
+  if (jpeg.startsWith("data:image/jpeg;base64,")) {
+    return { dataUrl: jpeg, format: "JPEG" }
+  }
+
+  throw new Error("No se pudo serializar la imagen para el PDF.")
 }
 
 const COLOR_PROPS = [
@@ -166,6 +194,28 @@ function normalizeCloneLayout(sourceRoot: HTMLElement, clonedDoc: Document) {
   if (!cloneRoot) return
 
   cloneRoot.style.borderRadius = "0px"
+}
+
+function normalizeCloneGradients(sourceRoot: HTMLElement, clonedDoc: Document) {
+  const cloneRoot = clonedDoc.querySelector<HTMLElement>(
+    `[data-card-side="${sourceRoot.dataset.cardSide}"]`
+  )
+  if (!cloneRoot) return
+
+  const sourceEls = [sourceRoot, ...sourceRoot.querySelectorAll<HTMLElement>("*")]
+  const cloneEls = [cloneRoot, ...cloneRoot.querySelectorAll<HTMLElement>("*")]
+  const len = Math.min(sourceEls.length, cloneEls.length)
+
+  for (let i = 0; i < len; i++) {
+    const sourceEl = sourceEls[i]
+    const cloneEl = cloneEls[i]
+    const computed = window.getComputedStyle(sourceEl)
+    const bgImage = computed.getPropertyValue("background-image")
+
+    if (bgImage && bgImage !== "none" && bgImage.includes("gradient(")) {
+      cloneEl.style.setProperty("background-image", "none")
+    }
+  }
 }
 
 function replaceUnsupportedColors(value: string) {
