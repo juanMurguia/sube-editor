@@ -397,9 +397,6 @@ export default function Home() {
                 )}
                 {isExporting ? "Generando…" : "Exportar PDF"}
               </Button>
-              <p className="text-sm text-muted-foreground text-center pt-1">
-                Atajos: Ctrl/Cmd + E para exportar
-              </p>
             </div>
           </div>
         )}
@@ -549,7 +546,6 @@ export default function Home() {
           </main>
         </div>
       )}
-
     </div>
   );
 }
