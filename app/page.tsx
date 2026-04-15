@@ -305,18 +305,40 @@ export default function Home() {
             </span>
           </div>
 
-          <Button
-            variant="ghost"
-            size="icon"
-            type="button"
-            className="sm:hidden"
-            aria-label={isMenuOpen ? "Cerrar menú" : "Abrir menú"}
-            aria-expanded={isMenuOpen}
-            aria-controls="mobile-menu"
-            onClick={() => setIsMenuOpen((prev) => !prev)}
-          >
-            {isMenuOpen ? <X size={18} /> : <Menu size={18} />}
-          </Button>
+          <div className="sm:hidden flex items-center gap-1">
+            <Button
+              onClick={() => void handleExport()}
+              disabled={isExporting}
+              size="sm"
+              type="button"
+              aria-busy={isExporting}
+              className="h-8 px-2.5 gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 font-semibold shadow"
+            >
+              {isExporting ? (
+                <RefreshCw
+                  size={14}
+                  className="animate-spin"
+                  aria-hidden="true"
+                />
+              ) : (
+                <Download size={14} aria-hidden="true" />
+              )}
+              {isExporting ? "Generando…" : "Exportar"}
+            </Button>
+
+            <Button
+              variant="ghost"
+              size="icon"
+              type="button"
+              className="h-8 w-8"
+              aria-label={isMenuOpen ? "Cerrar menú" : "Abrir menú"}
+              aria-expanded={isMenuOpen}
+              aria-controls="mobile-menu"
+              onClick={() => setIsMenuOpen((prev) => !prev)}
+            >
+              {isMenuOpen ? <X size={18} /> : <Menu size={18} />}
+            </Button>
+          </div>
         </div>
 
         {isMenuOpen && (
@@ -385,7 +407,7 @@ export default function Home() {
 
       {isMobile ? (
         <div
-          className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden pb-24"
+          className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden pb-4"
           id="main"
           aria-labelledby="preview-title-mobile"
         >
@@ -528,29 +550,6 @@ export default function Home() {
         </div>
       )}
 
-      <div className="sm:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card/95 backdrop-blur">
-        <div className="max-w-7xl mx-auto px-4 py-3">
-          <Button
-            onClick={() => void handleExport()}
-            disabled={isExporting}
-            size="lg"
-            type="button"
-            aria-busy={isExporting}
-            className="w-full gap-2 bg-primary text-primary-foreground hover:bg-primary/90 font-semibold shadow"
-          >
-            {isExporting ? (
-              <RefreshCw
-                size={16}
-                className="animate-spin"
-                aria-hidden="true"
-              />
-            ) : (
-              <Download size={16} aria-hidden="true" />
-            )}
-            {isExporting ? "Generando…" : "Exportar Imprimible PDF"}
-          </Button>
-        </div>
-      </div>
     </div>
   );
 }
