@@ -1,5 +1,6 @@
-import { useRef, type ChangeEvent } from "react"
+import { useRef, useState, type ChangeEvent } from "react"
 import { Layers } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider"
 import type { CardImage, CardSide, CardState } from "@/lib/card-types"
 import type { EditorChangeHandler } from "./types"
@@ -14,11 +15,12 @@ interface ImagesTabProps {
 interface ImageItemProps {
   image: CardImage
   index: number
+  mode: "basic" | "advanced"
   onRemove: (id: string) => void
   onUpdate: (id: string, update: Partial<CardImage>) => void
 }
 
-function ImageItem({ image, index, onRemove, onUpdate }: ImageItemProps) {
+function ImageItem({ image, index, mode, onRemove, onUpdate }: ImageItemProps) {
   return (
     <div className="flex flex-col gap-2 p-3 bg-secondary rounded-lg border border-border/60 transition-shadow hover:shadow-[var(--elevation-shadow-1)]">
       <div className="flex items-center gap-2">
@@ -32,9 +34,7 @@ function ImageItem({ image, index, onRemove, onUpdate }: ImageItemProps) {
             backgroundColor: "#f0f0f0",
           }}
         />
-        <span className="text-xs text-foreground font-medium flex-1">
-          Imagen {index + 1}
-        </span>
+        <span className="text-xs text-foreground font-medium flex-1">Imagen {index + 1}</span>
         <button
           type="button"
           onClick={() => onRemove(image.id)}
@@ -62,39 +62,38 @@ function ImageItem({ image, index, onRemove, onUpdate }: ImageItemProps) {
         onChange={(value) => onUpdate(image.id, { scale: value / 100 })}
         labelClassName="w-20"
       />
-      <div className="grid grid-cols-2 gap-2">
-        <div className="flex flex-col gap-1">
-          <span className="text-xs text-muted-foreground">
-            Posición horizontal: {image.x}
-          </span>
-          <Slider
-            min={0}
-            max={CARD_WIDTH}
-            step={5}
-            value={[image.x]}
-            onValueChange={([value]) => onUpdate(image.id, { x: value })}
-            className="cursor-pointer"
-          />
+      {mode === "advanced" && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <div className="flex flex-col gap-1">
+            <span className="text-xs text-muted-foreground">Posición horizontal: {image.x}</span>
+            <Slider
+              min={0}
+              max={CARD_WIDTH}
+              step={5}
+              value={[image.x]}
+              onValueChange={([value]) => onUpdate(image.id, { x: value })}
+              className="cursor-pointer"
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <span className="text-xs text-muted-foreground">Posición vertical: {image.y}</span>
+            <Slider
+              min={0}
+              max={CARD_HEIGHT}
+              step={5}
+              value={[image.y]}
+              onValueChange={([value]) => onUpdate(image.id, { y: value })}
+              className="cursor-pointer"
+            />
+          </div>
         </div>
-        <div className="flex flex-col gap-1">
-          <span className="text-xs text-muted-foreground">
-            Posición vertical: {image.y}
-          </span>
-          <Slider
-            min={0}
-            max={CARD_HEIGHT}
-            step={5}
-            value={[image.y]}
-            onValueChange={([value]) => onUpdate(image.id, { y: value })}
-            className="cursor-pointer"
-          />
-        </div>
-      </div>
+      )}
     </div>
   )
 }
 
 export function ImagesTab({ card, onChange }: ImagesTabProps) {
+  const [mode, setMode] = useState<"basic" | "advanced">("basic")
   const frontOverlayRef = useRef<HTMLInputElement>(null)
   const backOverlayRef = useRef<HTMLInputElement>(null)
 
@@ -142,7 +141,7 @@ export function ImagesTab({ card, onChange }: ImagesTabProps) {
       [side]: {
         ...prev[side],
         images: prev[side].images.map((image) =>
-          image.id === id ? { ...image, ...update } : image
+          image.id === id ? { ...image, ...update } : image,
         ),
       },
     }))
@@ -160,9 +159,36 @@ export function ImagesTab({ card, onChange }: ImagesTabProps) {
 
   return (
     <div className="px-5 py-5 flex flex-col gap-5">
+      <SectionCard className="gap-2">
+        <p className="text-xs font-semibold text-foreground">Gestión de imágenes</p>
+        <p className="text-[11px] text-muted-foreground">
+          Básico para escala/opacidad. Avanzado suma posición exacta.
+        </p>
+        <div className="grid grid-cols-2 gap-2">
+          <Button
+            type="button"
+            size="sm"
+            variant={mode === "basic" ? "default" : "outline"}
+            onClick={() => setMode("basic")}
+            className="text-xs"
+          >
+            Básico
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant={mode === "advanced" ? "default" : "outline"}
+            onClick={() => setMode("advanced")}
+            className="text-xs"
+          >
+            Avanzado
+          </Button>
+        </div>
+      </SectionCard>
+
       <SectionCard>
         <p className="text-[11px] text-muted-foreground uppercase tracking-[0.2em] font-semibold">
-          Imágenes encima — Frente
+          Imágenes encima - Frente
         </p>
         <UploadButton
           icon={<Layers size={20} />}
@@ -179,9 +205,7 @@ export function ImagesTab({ card, onChange }: ImagesTabProps) {
           onChange={(e) => handleOverlayFile("front", e)}
         />
         {card.front.images.length === 0 ? (
-          <p className="text-xs text-muted-foreground text-center py-4">
-            No hay imágenes agregadas
-          </p>
+          <p className="text-xs text-muted-foreground text-center py-4">No hay imágenes agregadas</p>
         ) : (
           <div className="flex flex-col gap-3">
             {card.front.images.map((image, index) => (
@@ -189,6 +213,7 @@ export function ImagesTab({ card, onChange }: ImagesTabProps) {
                 key={image.id}
                 image={image}
                 index={index}
+                mode={mode}
                 onRemove={(id) => removeImage("front", id)}
                 onUpdate={(id, update) => updateImage("front", id, update)}
               />
@@ -199,7 +224,7 @@ export function ImagesTab({ card, onChange }: ImagesTabProps) {
 
       <SectionCard>
         <p className="text-[11px] text-muted-foreground uppercase tracking-[0.2em] font-semibold">
-          Imágenes encima — Dorso
+          Imágenes encima - Dorso
         </p>
         <UploadButton
           icon={<Layers size={20} />}
@@ -216,9 +241,7 @@ export function ImagesTab({ card, onChange }: ImagesTabProps) {
           onChange={(e) => handleOverlayFile("back", e)}
         />
         {card.back.images.length === 0 ? (
-          <p className="text-xs text-muted-foreground text-center py-4">
-            No hay imágenes agregadas
-          </p>
+          <p className="text-xs text-muted-foreground text-center py-4">No hay imágenes agregadas</p>
         ) : (
           <div className="flex flex-col gap-3">
             {card.back.images.map((image, index) => (
@@ -226,6 +249,7 @@ export function ImagesTab({ card, onChange }: ImagesTabProps) {
                 key={image.id}
                 image={image}
                 index={index}
+                mode={mode}
                 onRemove={(id) => removeImage("back", id)}
                 onUpdate={(id, update) => updateImage("back", id, update)}
               />

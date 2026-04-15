@@ -59,12 +59,17 @@ export default function EditorPanel({ card, onChange }: EditorPanelProps) {
 
   return (
     <div className="flex flex-col h-full overflow-y-auto pb-6">
+      <div className="px-5 pt-4 pb-1">
+        <p className="text-[11px] text-muted-foreground">
+          Tip: usá <span className="font-semibold text-foreground">Ctrl/Cmd + E</span> para exportar rápido.
+        </p>
+      </div>
       <Tabs
         value={activeTab}
         onValueChange={setActiveTab}
         className="flex-1"
       >
-        <div className="px-5 pt-4">
+        <div className="px-5 pt-3">
           <TabsList className="w-full h-auto rounded-xl border border-border/60 bg-secondary p-1 elev-level-1">
           <TabsTrigger
             value="datos"

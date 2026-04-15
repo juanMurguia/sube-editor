@@ -3,43 +3,50 @@
 import CardBack from "@/components/card-back";
 import CardFront from "@/components/card-front";
 import EditorPanel from "@/components/editor-panel";
+import { ToastAction } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { toast } from "@/hooks/use-toast";
 import { CardState, defaultCardState } from "@/lib/card-types";
 import { cn } from "@/lib/utils";
-import {
-  ChevronRight,
-  Download,
-  Menu,
-  RefreshCw,
-  RotateCcw,
-  X,
-} from "lucide-react";
+import { Download, Menu, RefreshCw, RotateCcw, X } from "lucide-react";
 import {
   useCallback,
   useEffect,
   useLayoutEffect,
   useRef,
   useState,
-  type TouchEvent,
 } from "react";
+
+const DRAFT_STORAGE_KEY = "sube-editor:draft:v1";
+
+function isCardStateLike(value: unknown): value is CardState {
+  if (!value || typeof value !== "object") return false;
+  const candidate = value as CardState;
+  return (
+    typeof candidate.name === "string" &&
+    typeof candidate.number === "string" &&
+    !!candidate.front &&
+    !!candidate.back &&
+    Array.isArray(candidate.front.images) &&
+    Array.isArray(candidate.back.images)
+  );
+}
 
 export default function Home() {
   const [card, setCard] = useState<CardState>(defaultCardState);
   const [isExporting, setIsExporting] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activePreview, setActivePreview] = useState<"front" | "back">("front");
-  const [pullDistance, setPullDistance] = useState(0);
-  const [isRefreshingPreview, setIsRefreshingPreview] = useState(false);
-  const [previewKey, setPreviewKey] = useState(0);
   const [previewScale, setPreviewScale] = useState(1);
+  const [hasHydratedDraft, setHasHydratedDraft] = useState(false);
+  const [hasSavedDraft, setHasSavedDraft] = useState(false);
+  const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
 
   const frontRef = useRef<HTMLDivElement>(null);
   const backRef = useRef<HTMLDivElement>(null);
-  const mainScrollRef = useRef<HTMLDivElement>(null);
   const previewWrapRef = useRef<HTMLDivElement>(null);
-  const touchStartRef = useRef({ x: 0, y: 0 });
-  const lastDeltaRef = useRef({ x: 0, y: 0 });
+  const saveTimeoutRef = useRef<number | null>(null);
 
   const isMobile = useIsMobile();
 
@@ -53,33 +60,134 @@ export default function Home() {
     [],
   );
 
-  async function handleExport() {
+  const handleExport = useCallback(async () => {
     if (!frontRef.current || !backRef.current) return;
+
     setIsExporting(true);
     try {
       const { exportCardsPDF } = await import("@/lib/export-pdf");
       await exportCardsPDF(frontRef.current, backRef.current, card);
+      toast({
+        title: "PDF listo",
+        description: "Se generaron frente y dorso correctamente.",
+      });
     } catch (err) {
       console.error("Error exportando PDF:", err);
-      alert("Ocurrió un error al generar el PDF. Intentá de nuevo.");
+      toast({
+        variant: "destructive",
+        title: "No se pudo exportar",
+        description: "Volvé a intentarlo en unos segundos.",
+      });
     } finally {
       setIsExporting(false);
     }
-  }
+  }, [card]);
 
-  function handleReset() {
-    if (confirm("¿Seguro que querés reiniciar el diseño?")) {
-      setCard(defaultCardState);
-    }
-  }
+  const clearDraft = useCallback(() => {
+    window.localStorage.removeItem(DRAFT_STORAGE_KEY);
+    setHasSavedDraft(false);
+    setLastSavedAt(null);
+  }, []);
+
+  const handleReset = useCallback(() => {
+    const snapshot = card;
+    setCard(defaultCardState);
+    clearDraft();
+    toast({
+      title: "Diseño reiniciado",
+      description: "Se borraron los cambios locales de esta sesión.",
+      action: (
+        <ToastAction
+          altText="Deshacer reinicio"
+          onClick={() => {
+            setCard(snapshot);
+            toast({
+              title: "Cambios restaurados",
+              description: "Tu diseño volvió al estado anterior.",
+            });
+          }}
+        >
+          Deshacer
+        </ToastAction>
+      ),
+    });
+  }, [card, clearDraft]);
 
   useEffect(() => {
     if (!isMobile) {
       setIsMenuOpen(false);
       setActivePreview("front");
-      setPullDistance(0);
     }
   }, [isMobile]);
+
+  useEffect(() => {
+    const draftRaw = window.localStorage.getItem(DRAFT_STORAGE_KEY);
+    if (!draftRaw) {
+      setHasHydratedDraft(true);
+      return;
+    }
+
+    try {
+      const parsed = JSON.parse(draftRaw) as unknown;
+      if (!isCardStateLike(parsed)) {
+        window.localStorage.removeItem(DRAFT_STORAGE_KEY);
+        setHasHydratedDraft(true);
+        return;
+      }
+
+      setCard(parsed);
+      setHasSavedDraft(true);
+      setLastSavedAt(new Date());
+      toast({
+        title: "Borrador restaurado",
+        description: "Recuperamos tu última personalización automáticamente.",
+      });
+    } catch {
+      window.localStorage.removeItem(DRAFT_STORAGE_KEY);
+    } finally {
+      setHasHydratedDraft(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!hasHydratedDraft) return;
+
+    if (saveTimeoutRef.current) {
+      window.clearTimeout(saveTimeoutRef.current);
+    }
+
+    saveTimeoutRef.current = window.setTimeout(() => {
+      window.localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(card));
+      setHasSavedDraft(true);
+      setLastSavedAt(new Date());
+    }, 250);
+
+    return () => {
+      if (saveTimeoutRef.current) {
+        window.clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, [card, hasHydratedDraft]);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      const modifier = event.ctrlKey || event.metaKey;
+      if (!modifier) return;
+
+      if (event.key.toLowerCase() === "e") {
+        event.preventDefault();
+        void handleExport();
+      }
+
+      if (event.key.toLowerCase() === "r" && event.shiftKey) {
+        event.preventDefault();
+        handleReset();
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [handleExport, handleReset]);
 
   useLayoutEffect(() => {
     if (!isMobile) {
@@ -89,7 +197,7 @@ export default function Home() {
 
     const CARD_BASE_WIDTH = 342;
     const CARD_BASE_HEIGHT = 216;
-    const VERTICAL_CHROME = 64;
+    const VERTICAL_CHROME = 92;
     const HORIZONTAL_GUTTER = 16;
 
     const updateScale = () => {
@@ -129,54 +237,12 @@ export default function Home() {
     };
   }, [isMobile]);
 
-  const handlePreviewTouchStart = useCallback(
-    (event: TouchEvent<HTMLDivElement>) => {
-      if (!isMobile) return;
-      const touch = event.touches[0];
-      touchStartRef.current = { x: touch.clientX, y: touch.clientY };
-      lastDeltaRef.current = { x: 0, y: 0 };
-    },
-    [isMobile],
-  );
-
-  const handlePreviewTouchMove = useCallback(
-    (event: TouchEvent<HTMLDivElement>) => {
-      if (!isMobile) return;
-      const touch = event.touches[0];
-      const dx = touch.clientX - touchStartRef.current.x;
-      const dy = touch.clientY - touchStartRef.current.y;
-      lastDeltaRef.current = { x: dx, y: dy };
-
-      if (Math.abs(dy) > Math.abs(dx) && dy > 0) {
-        const scrollTop = mainScrollRef.current?.scrollTop ?? 0;
-        if (scrollTop <= 0) {
-          setPullDistance(Math.min(dy, 80));
-        }
-      } else if (Math.abs(dx) > Math.abs(dy)) {
-        setPullDistance(0);
-      }
-    },
-    [isMobile],
-  );
-
-  const handlePreviewTouchEnd = useCallback(() => {
-    if (!isMobile) return;
-    const { x: dx, y: dy } = lastDeltaRef.current;
-
-    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
-      setActivePreview((prev) => (prev === "front" ? "back" : "front"));
-    }
-
-    if (pullDistance > 60 && !isRefreshingPreview) {
-      setIsRefreshingPreview(true);
-      setPreviewKey((prev) => prev + 1);
-      window.setTimeout(() => {
-        setIsRefreshingPreview(false);
-      }, 700);
-    }
-
-    setPullDistance(0);
-  }, [isMobile, pullDistance, isRefreshingPreview]);
+  const savedTimeLabel = lastSavedAt
+    ? new Intl.DateTimeFormat("es-AR", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }).format(lastSavedAt)
+    : null;
 
   return (
     <div className="h-[100svh] bg-background flex flex-col overflow-hidden">
@@ -187,7 +253,6 @@ export default function Home() {
         Saltar al contenido
       </a>
 
-      {/* Header */}
       <header className="border-b border-border bg-card sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 h-14 sm:h-16 flex items-center justify-between gap-3">
           <div>
@@ -199,17 +264,26 @@ export default function Home() {
             </p>
           </div>
 
-          <p className="text-xs text-muted-foreground text-center hidden md:block">
-            Made with ❤️ by{" "}
-            <a
-              href="https://devjuan.online"
-              target="_blank"
-              rel="noreferrer"
-              className="text-foreground hover:underline"
-            >
-              Juan Cruz
-            </a>
-          </p>
+          <div className="hidden md:flex items-center gap-2 text-[11px] text-muted-foreground">
+            {hasSavedDraft ? (
+              <span>
+                Borrador guardado{savedTimeLabel ? ` · ${savedTimeLabel}` : ""}
+              </span>
+            ) : (
+              <span>Sin borrador local</span>
+            )}
+            {hasSavedDraft && (
+              <Button
+                variant="ghost"
+                size="sm"
+                type="button"
+                onClick={clearDraft}
+                className="h-7 px-2 text-[11px]"
+              >
+                Descartar
+              </Button>
+            )}
+          </div>
 
           <div className="hidden sm:flex items-center gap-2 justify-end">
             <Button
@@ -267,6 +341,20 @@ export default function Home() {
             className="sm:hidden border-t border-border bg-card"
           >
             <div className="px-4 py-3 flex flex-col gap-2">
+              {hasSavedDraft && (
+                <Button
+                  variant="ghost"
+                  size="lg"
+                  onClick={() => {
+                    clearDraft();
+                    setIsMenuOpen(false);
+                  }}
+                  type="button"
+                  className="justify-center"
+                >
+                  Descartar borrador
+                </Button>
+              )}
               <Button
                 variant="outline"
                 size="lg"
@@ -283,7 +371,7 @@ export default function Home() {
               </Button>
               <Button
                 onClick={() => {
-                  handleExport();
+                  void handleExport();
                   setIsMenuOpen(false);
                 }}
                 disabled={isExporting}
@@ -304,25 +392,15 @@ export default function Home() {
                 {isExporting ? "Generando…" : "Exportar PDF"}
               </Button>
               <p className="text-xs text-muted-foreground text-center pt-1">
-                Made with ❤️ by{" "}
-                <a
-                  href="https://devjuan.online"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-foreground hover:underline"
-                >
-                  Juan Cruz
-                </a>
+                Atajos: Ctrl/Cmd + E para exportar
               </p>
             </div>
           </div>
         )}
       </header>
 
-      {/* Main content */}
       {isMobile ? (
         <div
-          ref={mainScrollRef}
           className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden pb-24"
           id="main"
           aria-labelledby="preview-title-mobile"
@@ -334,57 +412,33 @@ export default function Home() {
             >
               Vista previa
             </h2>
-            <div
-              ref={previewWrapRef}
-              className="relative mt-2 h-[258px] w-full rounded-2xl border border-border/70 bg-card/55 px-2 py-2 touch-pan-y"
-              onTouchStart={handlePreviewTouchStart}
-              onTouchMove={handlePreviewTouchMove}
-              onTouchEnd={handlePreviewTouchEnd}
-            >
+
+            <div className="mt-2 grid grid-cols-2 gap-2">
               <Button
                 type="button"
-                variant="ghost"
-                size="icon"
-                className="absolute right-2 top-1/2 -translate-y-1/2 z-10 h-9 w-9 rounded-full bg-card/90 shadow-sm backdrop-blur"
-                aria-label={
-                  activePreview === "front" ? "Mostrar dorso" : "Mostrar frente"
-                }
-                onClick={() =>
-                  setActivePreview((prev) => (prev === "front" ? "back" : "front"))
-                }
+                variant={activePreview === "front" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setActivePreview("front")}
+                className="h-8 text-xs"
               >
-                <ChevronRight
-                  size={18}
-                  className={cn(
-                    "transition-transform",
-                    activePreview === "back" && "rotate-180",
-                  )}
-                  aria-hidden="true"
-                />
+                Frente
               </Button>
-              <div
-                className={cn(
-                  "pointer-events-none absolute -top-6 left-0 right-0 text-center text-[11px] text-muted-foreground transition-opacity",
-                  pullDistance > 0 ? "opacity-100" : "opacity-0",
-                )}
+              <Button
+                type="button"
+                variant={activePreview === "back" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setActivePreview("back")}
+                className="h-8 text-xs"
               >
-                {isRefreshingPreview
-                  ? "Actualizando vista…"
-                  : pullDistance > 60
-                    ? "Soltá para refrescar"
-                    : "Deslizá hacia abajo para refrescar"}
-              </div>
+                Dorso
+              </Button>
+            </div>
 
-              <div
-                key={previewKey}
-                className={cn(
-                  "flex h-full items-center justify-center transition-transform duration-150",
-                  pullDistance > 0 && "will-change-transform",
-                )}
-                style={{
-                  transform: pullDistance > 0 ? `translateY(${pullDistance}px)` : undefined,
-                }}
-              >
+            <div
+              ref={previewWrapRef}
+              className="relative mt-2 h-[258px] w-full rounded-2xl border border-border/70 bg-card/55 px-2 py-2"
+            >
+              <div className="flex h-full items-center justify-center">
                 <section
                   className={cn(
                     "flex flex-col items-center gap-3",
@@ -424,22 +478,9 @@ export default function Home() {
                 </section>
               </div>
             </div>
-            <div className="flex items-center justify-center gap-2 pt-2">
-              <span
-                className={cn(
-                  "h-2 w-2 rounded-full transition-colors",
-                  activePreview === "front" ? "bg-primary" : "bg-muted-foreground/30",
-                )}
-                aria-hidden="true"
-              />
-              <span
-                className={cn(
-                  "h-2 w-2 rounded-full transition-colors",
-                  activePreview === "back" ? "bg-primary" : "bg-muted-foreground/30",
-                )}
-                aria-hidden="true"
-              />
-            </div>
+            <p className="pt-2 text-[11px] text-center text-muted-foreground">
+              La exportación siempre incluye frente y dorso.
+            </p>
           </section>
 
           <aside className="px-3 py-3">
@@ -472,10 +513,7 @@ export default function Home() {
                 </p>
               </div>
 
-              <div
-                key={previewKey}
-                className="flex flex-col lg:flex-row items-center lg:items-start justify-center gap-10 lg:gap-12"
-              >
+              <div className="flex flex-col lg:flex-row items-center lg:items-start justify-center gap-10 lg:gap-12">
                 <section className="flex flex-col items-center gap-3" aria-labelledby="front-title">
                   <h3
                     id="front-title"
@@ -509,7 +547,7 @@ export default function Home() {
       <div className="sm:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card/95 backdrop-blur">
         <div className="max-w-7xl mx-auto px-4 py-3">
           <Button
-            onClick={handleExport}
+            onClick={() => void handleExport()}
             disabled={isExporting}
             size="lg"
             type="button"
