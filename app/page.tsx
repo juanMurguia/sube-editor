@@ -45,8 +45,6 @@ export default function Home() {
 
   const frontRef = useRef<HTMLDivElement>(null);
   const backRef = useRef<HTMLDivElement>(null);
-  const exportFrontRef = useRef<HTMLDivElement>(null);
-  const exportBackRef = useRef<HTMLDivElement>(null);
   const previewWrapRef = useRef<HTMLDivElement>(null);
   const saveTimeoutRef = useRef<number | null>(null);
 
@@ -63,12 +61,12 @@ export default function Home() {
   );
 
   const handleExport = useCallback(async () => {
-    if (!exportFrontRef.current || !exportBackRef.current) return;
+    if (!frontRef.current || !backRef.current) return;
 
     setIsExporting(true);
     try {
       const { exportCardsPDF } = await import("@/lib/export-pdf");
-      await exportCardsPDF(exportFrontRef.current, exportBackRef.current, card);
+      await exportCardsPDF(frontRef.current, backRef.current, card);
       toast({
         title: "PDF listo",
         description: "Se generaron frente y dorso correctamente.",
@@ -445,12 +443,6 @@ export default function Home() {
                   aria-labelledby="front-title-mobile"
                   aria-hidden={activePreview !== "front"}
                 >
-                  <h3
-                    id="front-title-mobile"
-                    className="text-sm font-semibold uppercase tracking-wider px-2 py-0.5 rounded bg-primary/10 text-primary"
-                  >
-                    Frente
-                  </h3>
                   <div className="[--card-shadow:0_18px_50px_rgba(10,15,28,0.24)]">
                     <CardFront
                       ref={frontRef}
@@ -468,12 +460,6 @@ export default function Home() {
                   aria-labelledby="back-title-mobile"
                   aria-hidden={activePreview !== "back"}
                 >
-                  <h3
-                    id="back-title-mobile"
-                    className="text-sm font-semibold uppercase tracking-wider px-2 py-0.5 rounded bg-primary/10 text-primary"
-                  >
-                    Dorso
-                  </h3>
                   <div className="[--card-shadow:0_18px_50px_rgba(10,15,28,0.24)]">
                     <CardBack ref={backRef} card={card} scale={previewScale} />
                   </div>
@@ -548,24 +534,6 @@ export default function Home() {
           </main>
         </div>
       )}
-
-      {/* Stable export targets: always mounted, never responsive-hidden */}
-      <div
-        aria-hidden="true"
-        style={{
-          position: "fixed",
-          left: -10000,
-          top: 0,
-          width: 1,
-          height: 1,
-          overflow: "hidden",
-          pointerEvents: "none",
-          opacity: 0,
-        }}
-      >
-        <CardFront ref={exportFrontRef} card={card} scale={1} forExport />
-        <CardBack ref={exportBackRef} card={card} scale={1} forExport />
-      </div>
     </div>
   );
 }
