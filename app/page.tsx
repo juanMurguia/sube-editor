@@ -320,112 +320,163 @@ export default function Home() {
       </header>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden min-h-0 ">
-        {/* LEFT: Editor panel */}
-        <aside className="fixed bottom-20 left-3 right-3 z-40 flex flex-col max-h-[55svh] rounded-[28px] border border-border/70 bg-card/95 shadow-[0_-18px_40px_rgba(2,6,13,0.18)] backdrop-blur supports-[backdrop-filter]:bg-card/90 overflow-hidden sm:static sm:inset-auto sm:z-auto sm:w-full lg:w-96 xl:w-md 2xl:w-120 sm:max-h-[45svh] lg:max-h-none lg:h-full sm:rounded-none sm:border-t-0 sm:border-x-0 sm:border-b sm:border-border lg:border-b-0 lg:border-r sm:bg-card sm:shadow-none sm:backdrop-blur-0 sm:overflow-y-auto sm:overscroll-contain sm:elev-level-1 min-h-0">
-          <div className="sm:hidden flex items-center justify-center pt-2">
-            <span className="h-1.5 w-10 rounded-full bg-muted-foreground/30" />
-          </div>
-          <EditorPanel card={card} onChange={handleChange} />
-        </aside>
-
-        {/* RIGHT: Preview area — always shows both sides */}
-        <main
-          id="main"
+      {isMobile ? (
+        <div
           ref={mainScrollRef}
-          className=" flex-1 flex flex-col items-center justify-start lg:justify-center p-5 pb-24 sm:p-6 sm:pb-6 lg:p-8 gap-6 overflow-y-auto lg:overflow-hidden  "
-          aria-labelledby="preview-title"
+          className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden pb-24"
+          id="main"
+          aria-labelledby="preview-title-mobile"
         >
-          <div className="w-full max-w-5xl flex flex-col items-center gap-4 flex-1 min-h-0">
-            <div className="flex items-end justify-between gap-4 w-full">
-              {!isMobile && (
-                <div className="w-full text-center">
-                  <h2
-                    id="preview-title"
-                    className="text-xs font-semibold text-center uppercase tracking-wider text-muted-foreground"
-                  >
-                    Vista previa
-                  </h2>
-
-                  <p className="text-xs text-muted-foreground text-center">
-                    La exportación incluye frente y dorso.
-                  </p>
-                </div>
-              )}
-            </div>
-
+          <section className="sticky top-0 z-30 border-b border-border/60 bg-background/95 px-3 pt-3 pb-3 backdrop-blur supports-[backdrop-filter]:bg-background/90">
+            <h2
+              id="preview-title-mobile"
+              className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground text-center"
+            >
+              Vista previa
+            </h2>
             <div
               ref={previewWrapRef}
-              className="relative w-full flex-1 min-h-0 flex items-center justify-center touch-pan-y"
+              className="relative mt-2 h-[258px] w-full rounded-2xl border border-border/70 bg-card/55 px-2 py-2 touch-pan-y"
               onTouchStart={handlePreviewTouchStart}
               onTouchMove={handlePreviewTouchMove}
               onTouchEnd={handlePreviewTouchEnd}
             >
-              {isMobile && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="sm:hidden absolute right-2 top-1/2 -translate-y-1/2 z-10 h-9 w-9 rounded-full bg-card/90 shadow-sm backdrop-blur"
-                  aria-label={
-                    activePreview === "front"
-                      ? "Mostrar dorso"
-                      : "Mostrar frente"
-                  }
-                  onClick={() =>
-                    setActivePreview((prev) =>
-                      prev === "front" ? "back" : "front",
-                    )
-                  }
-                >
-                  <ChevronRight
-                    size={18}
-                    className={cn(
-                      "transition-transform",
-                      activePreview === "back" && "rotate-180",
-                    )}
-                    aria-hidden="true"
-                  />
-                </Button>
-              )}
-              {isMobile && (
-                <div
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="absolute right-2 top-1/2 -translate-y-1/2 z-10 h-9 w-9 rounded-full bg-card/90 shadow-sm backdrop-blur"
+                aria-label={
+                  activePreview === "front" ? "Mostrar dorso" : "Mostrar frente"
+                }
+                onClick={() =>
+                  setActivePreview((prev) => (prev === "front" ? "back" : "front"))
+                }
+              >
+                <ChevronRight
+                  size={18}
                   className={cn(
-                    "pointer-events-none absolute -top-7 left-0 right-0 text-center text-[11px] text-muted-foreground transition-opacity",
-                    pullDistance > 0 ? "opacity-100" : "opacity-0",
+                    "transition-transform",
+                    activePreview === "back" && "rotate-180",
                   )}
-                >
-                  {isRefreshingPreview
-                    ? "Actualizando vista…"
-                    : pullDistance > 60
-                      ? "Soltá para refrescar"
-                      : "Deslizá hacia abajo para refrescar"}
-                </div>
-              )}
+                  aria-hidden="true"
+                />
+              </Button>
+              <div
+                className={cn(
+                  "pointer-events-none absolute -top-6 left-0 right-0 text-center text-[11px] text-muted-foreground transition-opacity",
+                  pullDistance > 0 ? "opacity-100" : "opacity-0",
+                )}
+              >
+                {isRefreshingPreview
+                  ? "Actualizando vista…"
+                  : pullDistance > 60
+                    ? "Soltá para refrescar"
+                    : "Deslizá hacia abajo para refrescar"}
+              </div>
 
-              {/* Card previews — stacked on mobile, side by side on large screens */}
               <div
                 key={previewKey}
                 className={cn(
-                  "flex flex-col lg:flex-row items-center lg:items-start justify-center gap-10 lg:gap-12 transition-transform duration-150",
+                  "flex h-full items-center justify-center transition-transform duration-150",
                   pullDistance > 0 && "will-change-transform",
                 )}
                 style={{
-                  transform:
-                    isMobile && pullDistance > 0
-                      ? `translateY(${pullDistance}px)`
-                      : undefined,
+                  transform: pullDistance > 0 ? `translateY(${pullDistance}px)` : undefined,
                 }}
               >
-                {/* Front preview */}
                 <section
                   className={cn(
                     "flex flex-col items-center gap-3",
-                    isMobile && activePreview !== "front" && "hidden",
+                    activePreview !== "front" && "hidden",
                   )}
-                  aria-labelledby="front-title"
-                  aria-hidden={isMobile && activePreview !== "front"}
+                  aria-labelledby="front-title-mobile"
+                  aria-hidden={activePreview !== "front"}
                 >
+                  <h3
+                    id="front-title-mobile"
+                    className="text-xs font-semibold uppercase tracking-wider px-2 py-0.5 rounded bg-primary/10 text-primary"
+                  >
+                    Frente
+                  </h3>
+                  <div className="[--card-shadow:0_18px_50px_rgba(0,0,0,0.25)]">
+                    <CardFront ref={frontRef} card={card} scale={previewScale} />
+                  </div>
+                </section>
+
+                <section
+                  className={cn(
+                    "flex flex-col items-center gap-3",
+                    activePreview !== "back" && "hidden",
+                  )}
+                  aria-labelledby="back-title-mobile"
+                  aria-hidden={activePreview !== "back"}
+                >
+                  <h3
+                    id="back-title-mobile"
+                    className="text-xs font-semibold uppercase tracking-wider px-2 py-0.5 rounded bg-primary/10 text-primary"
+                  >
+                    Dorso
+                  </h3>
+                  <div className="[--card-shadow:0_18px_50px_rgba(0,0,0,0.25)]">
+                    <CardBack ref={backRef} card={card} scale={previewScale} />
+                  </div>
+                </section>
+              </div>
+            </div>
+            <div className="flex items-center justify-center gap-2 pt-2">
+              <span
+                className={cn(
+                  "h-2 w-2 rounded-full transition-colors",
+                  activePreview === "front" ? "bg-primary" : "bg-muted-foreground/30",
+                )}
+                aria-hidden="true"
+              />
+              <span
+                className={cn(
+                  "h-2 w-2 rounded-full transition-colors",
+                  activePreview === "back" ? "bg-primary" : "bg-muted-foreground/30",
+                )}
+                aria-hidden="true"
+              />
+            </div>
+          </section>
+
+          <aside className="px-3 py-3">
+            <div className="rounded-3xl border border-border/70 bg-card shadow-sm">
+              <EditorPanel card={card} onChange={handleChange} />
+            </div>
+          </aside>
+        </div>
+      ) : (
+        <div className="flex-1 flex min-h-0 overflow-hidden">
+          <aside className="w-96 xl:w-md 2xl:w-120 border-r border-border bg-card overflow-y-auto overscroll-contain min-h-0">
+            <EditorPanel card={card} onChange={handleChange} />
+          </aside>
+
+          <main
+            id="main"
+            className="flex-1 flex flex-col items-center justify-center p-6 lg:p-8 gap-6 overflow-hidden"
+            aria-labelledby="preview-title"
+          >
+            <div className="w-full max-w-5xl flex flex-col items-center gap-4 flex-1 min-h-0">
+              <div className="w-full text-center">
+                <h2
+                  id="preview-title"
+                  className="text-xs font-semibold text-center uppercase tracking-wider text-muted-foreground"
+                >
+                  Vista previa
+                </h2>
+                <p className="text-xs text-muted-foreground text-center">
+                  La exportación incluye frente y dorso.
+                </p>
+              </div>
+
+              <div
+                key={previewKey}
+                className="flex flex-col lg:flex-row items-center lg:items-start justify-center gap-10 lg:gap-12"
+              >
+                <section className="flex flex-col items-center gap-3" aria-labelledby="front-title">
                   <h3
                     id="front-title"
                     className="text-xs font-semibold uppercase tracking-wider px-2 py-0.5 rounded bg-primary/10 text-primary"
@@ -433,23 +484,11 @@ export default function Home() {
                     Frente
                   </h3>
                   <div className="transition-transform duration-200 ease-out hover:scale-[1.02] will-change-transform [--card-shadow:0_18px_50px_rgba(0,0,0,0.25)] hover:[--card-shadow:0_26px_70px_rgba(0,0,0,0.38)]">
-                    <CardFront
-                      ref={frontRef}
-                      card={card}
-                      scale={isMobile ? previewScale : 1}
-                    />
+                    <CardFront ref={frontRef} card={card} />
                   </div>
                 </section>
 
-                {/* Back preview */}
-                <section
-                  className={cn(
-                    "flex flex-col items-center gap-3",
-                    isMobile && activePreview !== "back" && "hidden",
-                  )}
-                  aria-labelledby="back-title"
-                  aria-hidden={isMobile && activePreview !== "back"}
-                >
+                <section className="flex flex-col items-center gap-3" aria-labelledby="back-title">
                   <h3
                     id="back-title"
                     className="text-xs font-semibold uppercase tracking-wider px-2 py-0.5 rounded bg-primary/10 text-primary"
@@ -457,46 +496,15 @@ export default function Home() {
                     Dorso
                   </h3>
                   <div className="transition-transform duration-200 ease-out hover:scale-[1.02] will-change-transform [--card-shadow:0_18px_50px_rgba(0,0,0,0.25)] hover:[--card-shadow:0_26px_70px_rgba(0,0,0,0.38)]">
-                    <CardBack
-                      ref={backRef}
-                      card={card}
-                      scale={isMobile ? previewScale : 1}
-                    />
+                    <CardBack ref={backRef} card={card} />
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    Incluye banda magnética
-                  </p>
+                  <p className="text-xs text-muted-foreground">Incluye banda magnética</p>
                 </section>
               </div>
             </div>
-
-            {isMobile && (
-              <div className="flex items-center justify-center gap-2 pt-1">
-                <span
-                  className={cn(
-                    "h-2 w-2 rounded-full transition-colors",
-                    activePreview === "front"
-                      ? "bg-primary"
-                      : "bg-muted-foreground/30",
-                  )}
-                  aria-hidden="true"
-                />
-                <span
-                  className={cn(
-                    "h-2 w-2 rounded-full transition-colors",
-                    activePreview === "back"
-                      ? "bg-primary"
-                      : "bg-muted-foreground/30",
-                  )}
-                  aria-hidden="true"
-                />
-              </div>
-            )}
-          </div>
-
-          {/* Export CTA removed from canvas */}
-        </main>
-      </div>
+          </main>
+        </div>
+      )}
 
       <div className="sm:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card/95 backdrop-blur">
         <div className="max-w-7xl mx-auto px-4 py-3">
