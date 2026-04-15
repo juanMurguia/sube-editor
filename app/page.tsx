@@ -41,7 +41,7 @@ export default function Home() {
   const [previewScale, setPreviewScale] = useState(1);
   const [hasHydratedDraft, setHasHydratedDraft] = useState(false);
   const [hasSavedDraft, setHasSavedDraft] = useState(false);
-  const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
+  const [, setLastSavedAt] = useState<Date | null>(null);
 
   const frontRef = useRef<HTMLDivElement>(null);
   const backRef = useRef<HTMLDivElement>(null);
@@ -237,13 +237,6 @@ export default function Home() {
     };
   }, [isMobile]);
 
-  const savedTimeLabel = lastSavedAt
-    ? new Intl.DateTimeFormat("es-AR", {
-        hour: "2-digit",
-        minute: "2-digit",
-      }).format(lastSavedAt)
-    : null;
-
   return (
     <div className="h-[100svh] bg-background flex flex-col overflow-hidden">
       <a
@@ -259,30 +252,9 @@ export default function Home() {
             <h1 className="text-base sm:text-sm font-bold text-foreground font-serif leading-none">
               Mi SUBE Personalizada
             </h1>
-            <p className="text-xs text-muted-foreground leading-none mt-0.5">
+            <p className="text-sm text-muted-foreground leading-none mt-0.5">
               Diseñá y exportá tu tarjeta
             </p>
-          </div>
-
-          <div className="hidden md:flex items-center gap-2 text-[11px] text-muted-foreground">
-            {hasSavedDraft ? (
-              <span>
-                Borrador guardado{savedTimeLabel ? ` · ${savedTimeLabel}` : ""}
-              </span>
-            ) : (
-              <span>Sin borrador local</span>
-            )}
-            {hasSavedDraft && (
-              <Button
-                variant="ghost"
-                size="sm"
-                type="button"
-                onClick={clearDraft}
-                className="h-7 px-2 text-[11px]"
-              >
-                Descartar
-              </Button>
-            )}
           </div>
 
           <div className="hidden sm:flex items-center gap-2 justify-end">
@@ -292,7 +264,7 @@ export default function Home() {
               onClick={handleReset}
               type="button"
               aria-label="Reiniciar diseño"
-              className="gap-1.5 text-xs text-muted-foreground hover:text-foreground"
+              className="gap-1.5 text-sm text-muted-foreground hover:text-foreground"
             >
               <RotateCcw size={14} aria-hidden="true" />
               <span className="hidden md:inline">Reiniciar</span>
@@ -391,7 +363,7 @@ export default function Home() {
                 )}
                 {isExporting ? "Generando…" : "Exportar PDF"}
               </Button>
-              <p className="text-xs text-muted-foreground text-center pt-1">
+              <p className="text-sm text-muted-foreground text-center pt-1">
                 Atajos: Ctrl/Cmd + E para exportar
               </p>
             </div>
@@ -408,7 +380,7 @@ export default function Home() {
           <section className="sticky top-0 z-30 border-b border-border/60 bg-background/95 px-3 pt-3 pb-3 backdrop-blur supports-[backdrop-filter]:bg-background/90">
             <h2
               id="preview-title-mobile"
-              className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground text-center"
+              className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground text-center"
             >
               Vista previa
             </h2>
@@ -449,11 +421,11 @@ export default function Home() {
                 >
                   <h3
                     id="front-title-mobile"
-                    className="text-xs font-semibold uppercase tracking-wider px-2 py-0.5 rounded bg-primary/10 text-primary"
+                    className="text-sm font-semibold uppercase tracking-wider px-2 py-0.5 rounded bg-primary/10 text-primary"
                   >
                     Frente
                   </h3>
-                  <div className="[--card-shadow:0_18px_50px_rgba(0,0,0,0.25)]">
+                  <div className="[--card-shadow:0_18px_50px_rgba(10,15,28,0.24)]">
                     <CardFront ref={frontRef} card={card} scale={previewScale} />
                   </div>
                 </section>
@@ -468,25 +440,23 @@ export default function Home() {
                 >
                   <h3
                     id="back-title-mobile"
-                    className="text-xs font-semibold uppercase tracking-wider px-2 py-0.5 rounded bg-primary/10 text-primary"
+                    className="text-sm font-semibold uppercase tracking-wider px-2 py-0.5 rounded bg-primary/10 text-primary"
                   >
                     Dorso
                   </h3>
-                  <div className="[--card-shadow:0_18px_50px_rgba(0,0,0,0.25)]">
+                  <div className="[--card-shadow:0_18px_50px_rgba(10,15,28,0.24)]">
                     <CardBack ref={backRef} card={card} scale={previewScale} />
                   </div>
                 </section>
               </div>
             </div>
-            <p className="pt-2 text-[11px] text-center text-muted-foreground">
+            <p className="pt-2 text-sm text-center text-muted-foreground">
               La exportación siempre incluye frente y dorso.
             </p>
           </section>
 
           <aside className="px-3 py-3">
-            <div className="rounded-3xl border border-border/70 bg-card shadow-sm">
-              <EditorPanel card={card} onChange={handleChange} />
-            </div>
+            <EditorPanel card={card} onChange={handleChange} />
           </aside>
         </div>
       ) : (
@@ -504,11 +474,11 @@ export default function Home() {
               <div className="w-full text-center">
                 <h2
                   id="preview-title"
-                  className="text-xs font-semibold text-center uppercase tracking-wider text-muted-foreground"
+                  className="text-sm font-semibold text-center uppercase tracking-wider text-muted-foreground"
                 >
                   Vista previa
                 </h2>
-                <p className="text-xs text-muted-foreground text-center">
+                <p className="text-sm text-muted-foreground text-center">
                   La exportación incluye frente y dorso.
                 </p>
               </div>
@@ -517,11 +487,11 @@ export default function Home() {
                 <section className="flex flex-col items-center gap-3" aria-labelledby="front-title">
                   <h3
                     id="front-title"
-                    className="text-xs font-semibold uppercase tracking-wider px-2 py-0.5 rounded bg-primary/10 text-primary"
+                    className="text-sm font-semibold uppercase tracking-wider px-2 py-0.5 rounded bg-primary/10 text-primary"
                   >
                     Frente
                   </h3>
-                  <div className="transition-transform duration-200 ease-out hover:scale-[1.02] will-change-transform [--card-shadow:0_18px_50px_rgba(0,0,0,0.25)] hover:[--card-shadow:0_26px_70px_rgba(0,0,0,0.38)]">
+                  <div className="transition-transform duration-200 ease-out hover:scale-[1.02] will-change-transform [--card-shadow:0_18px_50px_rgba(10,15,28,0.24)] hover:[--card-shadow:0_26px_70px_rgba(10,15,28,0.34)]">
                     <CardFront ref={frontRef} card={card} />
                   </div>
                 </section>
@@ -529,14 +499,14 @@ export default function Home() {
                 <section className="flex flex-col items-center gap-3" aria-labelledby="back-title">
                   <h3
                     id="back-title"
-                    className="text-xs font-semibold uppercase tracking-wider px-2 py-0.5 rounded bg-primary/10 text-primary"
+                    className="text-sm font-semibold uppercase tracking-wider px-2 py-0.5 rounded bg-primary/10 text-primary"
                   >
                     Dorso
                   </h3>
-                  <div className="transition-transform duration-200 ease-out hover:scale-[1.02] will-change-transform [--card-shadow:0_18px_50px_rgba(0,0,0,0.25)] hover:[--card-shadow:0_26px_70px_rgba(0,0,0,0.38)]">
+                  <div className="transition-transform duration-200 ease-out hover:scale-[1.02] will-change-transform [--card-shadow:0_18px_50px_rgba(10,15,28,0.24)] hover:[--card-shadow:0_26px_70px_rgba(10,15,28,0.34)]">
                     <CardBack ref={backRef} card={card} />
                   </div>
-                  <p className="text-xs text-muted-foreground">Incluye banda magnética</p>
+                  <p className="text-sm text-muted-foreground">Incluye banda magnética</p>
                 </section>
               </div>
             </div>

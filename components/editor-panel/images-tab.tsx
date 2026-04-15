@@ -22,7 +22,7 @@ interface ImageItemProps {
 
 function ImageItem({ image, index, mode, onRemove, onUpdate }: ImageItemProps) {
   return (
-    <div className="flex flex-col gap-2 p-3 bg-secondary rounded-lg border border-border/60 transition-shadow hover:shadow-[var(--elevation-shadow-1)]">
+    <div className="flex flex-col gap-2 p-3 bg-background/70 rounded-lg border border-border/45 transition-shadow hover:shadow-[var(--elevation-shadow-1)]">
       <div className="flex items-center gap-2">
         <div
           className="w-10 h-10 rounded border border-border overflow-hidden flex-shrink-0"
@@ -34,12 +34,12 @@ function ImageItem({ image, index, mode, onRemove, onUpdate }: ImageItemProps) {
             backgroundColor: "#f0f0f0",
           }}
         />
-        <span className="text-xs text-foreground font-medium flex-1">Imagen {index + 1}</span>
+        <span className="text-sm text-foreground font-medium flex-1">Imagen {index + 1}</span>
         <button
           type="button"
           onClick={() => onRemove(image.id)}
           aria-label={`Quitar imagen ${index + 1}`}
-          className="cursor-pointer text-xs text-destructive hover:underline min-h-10 px-2 rounded-md touch-manipulation"
+          className="cursor-pointer text-sm text-destructive hover:underline min-h-10 px-2 rounded-md touch-manipulation"
         >
           Quitar
         </button>
@@ -65,7 +65,7 @@ function ImageItem({ image, index, mode, onRemove, onUpdate }: ImageItemProps) {
       {mode === "advanced" && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <div className="flex flex-col gap-1">
-            <span className="text-xs text-muted-foreground">Posición horizontal: {image.x}</span>
+            <span className="text-sm text-muted-foreground">Posición horizontal: {image.x}</span>
             <Slider
               min={0}
               max={CARD_WIDTH}
@@ -76,7 +76,7 @@ function ImageItem({ image, index, mode, onRemove, onUpdate }: ImageItemProps) {
             />
           </div>
           <div className="flex flex-col gap-1">
-            <span className="text-xs text-muted-foreground">Posición vertical: {image.y}</span>
+            <span className="text-sm text-muted-foreground">Posición vertical: {image.y}</span>
             <Slider
               min={0}
               max={CARD_HEIGHT}
@@ -159,9 +159,9 @@ export function ImagesTab({ card, onChange }: ImagesTabProps) {
 
   return (
     <div className="px-5 py-5 flex flex-col gap-5">
-      <SectionCard className="gap-2">
-        <p className="text-xs font-semibold text-foreground">Gestión de imágenes</p>
-        <p className="text-[11px] text-muted-foreground">
+      <SectionCard className="gap-2 border-none pt-0">
+        <p className="text-sm font-semibold text-foreground">Gestión de imágenes</p>
+        <p className="text-sm text-muted-foreground">
           Básico para escala/opacidad. Avanzado suma posición exacta.
         </p>
         <div className="grid grid-cols-2 gap-2">
@@ -170,7 +170,7 @@ export function ImagesTab({ card, onChange }: ImagesTabProps) {
             size="sm"
             variant={mode === "basic" ? "default" : "outline"}
             onClick={() => setMode("basic")}
-            className="text-xs"
+            className="text-sm"
           >
             Básico
           </Button>
@@ -179,7 +179,7 @@ export function ImagesTab({ card, onChange }: ImagesTabProps) {
             size="sm"
             variant={mode === "advanced" ? "default" : "outline"}
             onClick={() => setMode("advanced")}
-            className="text-xs"
+            className="text-sm"
           >
             Avanzado
           </Button>
@@ -187,7 +187,7 @@ export function ImagesTab({ card, onChange }: ImagesTabProps) {
       </SectionCard>
 
       <SectionCard>
-        <p className="text-[11px] text-muted-foreground uppercase tracking-[0.2em] font-semibold">
+        <p className="text-xs text-muted-foreground uppercase tracking-[0.2em] font-semibold">
           Imágenes encima - Frente
         </p>
         <UploadButton
@@ -205,7 +205,7 @@ export function ImagesTab({ card, onChange }: ImagesTabProps) {
           onChange={(e) => handleOverlayFile("front", e)}
         />
         {card.front.images.length === 0 ? (
-          <p className="text-xs text-muted-foreground text-center py-4">No hay imágenes agregadas</p>
+          <p className="text-sm text-muted-foreground text-center py-4">No hay imágenes agregadas</p>
         ) : (
           <div className="flex flex-col gap-3">
             {card.front.images.map((image, index) => (
@@ -223,7 +223,7 @@ export function ImagesTab({ card, onChange }: ImagesTabProps) {
       </SectionCard>
 
       <SectionCard>
-        <p className="text-[11px] text-muted-foreground uppercase tracking-[0.2em] font-semibold">
+        <p className="text-xs text-muted-foreground uppercase tracking-[0.2em] font-semibold">
           Imágenes encima - Dorso
         </p>
         <UploadButton
@@ -241,7 +241,7 @@ export function ImagesTab({ card, onChange }: ImagesTabProps) {
           onChange={(e) => handleOverlayFile("back", e)}
         />
         {card.back.images.length === 0 ? (
-          <p className="text-xs text-muted-foreground text-center py-4">No hay imágenes agregadas</p>
+          <p className="text-sm text-muted-foreground text-center py-4">No hay imágenes agregadas</p>
         ) : (
           <div className="flex flex-col gap-3">
             {card.back.images.map((image, index) => (

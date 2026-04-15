@@ -43,8 +43,8 @@ export function BackgroundTab({ card, onChange }: BackgroundTabProps) {
 
   return (
     <div className="px-5 py-5 flex flex-col gap-5">
-      <SectionCard>
-        <p className="text-[11px] text-muted-foreground uppercase tracking-[0.2em] font-semibold">
+      <SectionCard className="border-none pt-0">
+        <p className="text-xs text-muted-foreground uppercase tracking-[0.2em] font-semibold">
           Color de fondo — Frente
         </p>
         <div className="flex items-center gap-3">
@@ -83,7 +83,7 @@ export function BackgroundTab({ card, onChange }: BackgroundTabProps) {
       </SectionCard>
 
       <SectionCard>
-        <p className="text-[11px] text-muted-foreground uppercase tracking-[0.2em] font-semibold">
+        <p className="text-xs text-muted-foreground uppercase tracking-[0.2em] font-semibold">
           Color de fondo — Dorso
         </p>
         <div className="flex items-center gap-3">

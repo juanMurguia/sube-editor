@@ -80,9 +80,9 @@
   --elevation-3: 6;
   --elevation-4: 8;
   --elevation-5: 12;
-  --elevation-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.35);
-  --elevation-shadow-2: 0 4px 8px rgba(0, 0, 0, 0.5), 0 10px 18px rgba(0, 0, 0, 0.4);
-  --elevation-shadow-3: 0 10px 20px rgba(0, 0, 0, 0.55), 0 22px 40px rgba(0, 0, 0, 0.45);
+  --elevation-shadow-1: 0 1px 2px rgba(8, 12, 24, 0.45), 0 2px 6px rgba(8, 12, 24, 0.35);
+  --elevation-shadow-2: 0 4px 8px rgba(8, 12, 24, 0.5), 0 10px 18px rgba(8, 12, 24, 0.4);
+  --elevation-shadow-3: 0 10px 20px rgba(8, 12, 24, 0.55), 0 22px 40px rgba(8, 12, 24, 0.45);
   --sidebar: rgb(23, 23, 23);
   --sidebar-foreground: rgb(250, 250, 250);
   --sidebar-primary: rgb(20, 71, 230);
@@ -94,9 +94,9 @@
 }
 
 @theme inline {
-  --font-sans: var(--font-inter), 'Inter', system-ui, sans-serif;
-  --font-mono: 'Courier New', monospace;
-  --font-serif: var(--font-space-grotesk), 'Space Grotesk', sans-serif;
+  --font-sans: var(--font-quicksand), 'Quicksand', system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-serif: var(--font-archivo), 'Archivo', system-ui, sans-serif;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -141,6 +141,7 @@
   }
   body {
     @apply bg-background text-foreground;
+    line-height: 1.45;
   }
 }
 

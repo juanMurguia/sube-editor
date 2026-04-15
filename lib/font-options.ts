@@ -1,4 +1,4 @@
-export type NameFontId = "space-grotesk" | "inter" | "sora" | "archivo"
+export type NameFontId = "space-grotesk" | "sora" | "archivo"
 export type NumberFontId = "roboto-mono" | "jetbrains-mono" | "ibm-plex-mono"
 export type FontId = NameFontId | NumberFontId
 
@@ -11,18 +11,6 @@ export type FontOption = {
 
 export const NAME_FONT_OPTIONS: FontOption[] = [
   {
-    id: "space-grotesk",
-    label: "Space Grotesk",
-    cssVar: "--font-space-grotesk",
-    fallbacks: "'Space Grotesk', system-ui, sans-serif",
-  },
-  {
-    id: "inter",
-    label: "Inter",
-    cssVar: "--font-inter",
-    fallbacks: "'Inter', system-ui, sans-serif",
-  },
-  {
     id: "sora",
     label: "Sora",
     cssVar: "--font-sora",
@@ -33,6 +21,12 @@ export const NAME_FONT_OPTIONS: FontOption[] = [
     label: "Archivo",
     cssVar: "--font-archivo",
     fallbacks: "'Archivo', system-ui, sans-serif",
+  },
+  {
+    id: "space-grotesk",
+    label: "Space Grotesk",
+    cssVar: "--font-space-grotesk",
+    fallbacks: "'Space Grotesk', system-ui, sans-serif",
   },
 ]
 
@@ -58,11 +52,11 @@ export const NUMBER_FONT_OPTIONS: FontOption[] = [
 ]
 
 const FONT_MAP = new Map<string, FontOption>([
-  ...NAME_FONT_OPTIONS.map((opt) => [opt.id, opt]),
-  ...NUMBER_FONT_OPTIONS.map((opt) => [opt.id, opt]),
+  ...NAME_FONT_OPTIONS.map((opt) => [opt.id, opt] as const),
+  ...NUMBER_FONT_OPTIONS.map((opt) => [opt.id, opt] as const),
 ])
 
-export const DEFAULT_NAME_FONT: NameFontId = "space-grotesk"
+export const DEFAULT_NAME_FONT: NameFontId = "sora"
 export const DEFAULT_NUMBER_FONT: NumberFontId = "roboto-mono"
 
 export function getFontFamily(id: string) {

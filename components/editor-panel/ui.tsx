@@ -20,7 +20,7 @@ const SEGMENTED_STYLES: Record<SegmentedVariant, { base: string; active: string;
       "bg-secondary text-secondary-foreground hover:bg-muted hover:text-foreground hover:shadow-[var(--elevation-shadow-1)]",
   },
   pill: {
-    base: "cursor-pointer min-h-11 px-3 py-2 rounded-md text-xs font-semibold transition-[transform,box-shadow,background-color,color] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 active:scale-[0.98] elev-level-1 sm:min-h-9 sm:px-2.5 sm:py-1 touch-manipulation",
+    base: "cursor-pointer min-h-11 px-3 py-2 rounded-md text-sm font-semibold transition-[transform,box-shadow,background-color,color] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 active:scale-[0.98] elev-level-1 sm:min-h-9 sm:px-2.5 sm:py-1 touch-manipulation",
     active: "bg-primary text-primary-foreground elev-shadow-1",
     inactive:
       "bg-secondary text-secondary-foreground hover:bg-muted hover:text-foreground hover:shadow-[var(--elevation-shadow-1)]",
@@ -44,7 +44,7 @@ export function SectionCard({
   return (
     <div
       className={cn(
-        "flex flex-col gap-3 rounded-xl border border-border/60 bg-secondary p-4 elev-level-2",
+        "flex flex-col gap-3 border-t border-border/45 pt-4",
         className
       )}
     >
@@ -150,7 +150,7 @@ export function LabeledSlider({
 }) {
   return (
     <div className={cn("flex items-center gap-2", className)}>
-      <span className={cn("text-xs text-muted-foreground", labelClassName)}>
+      <span className={cn("text-sm text-muted-foreground", labelClassName)}>
         {label}
       </span>
       <Slider
@@ -189,7 +189,7 @@ export function UploadButton({
     >
       {icon}
       <span className="text-sm font-medium">{title}</span>
-      <span className="text-xs">{subtitle}</span>
+      <span className="text-sm">{subtitle}</span>
     </button>
   )
 }

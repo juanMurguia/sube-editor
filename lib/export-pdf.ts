@@ -171,7 +171,7 @@ function normalizeCloneLayout(sourceRoot: HTMLElement, clonedDoc: Document) {
 function replaceUnsupportedColors(value: string) {
   const replaced = value.replace(/(oklch|lab)\([^)]*\)/g, (match) => {
     const rgb = toRgb(match)
-    return rgb ?? "rgba(0, 0, 0, 0)"
+    return rgb ?? "rgba(8, 12, 24, 0)"
   })
 
   if (replaced !== value) return replaced
@@ -195,7 +195,7 @@ function toRgb(color: string) {
 
   try {
     colorCtx.clearRect(0, 0, 1, 1)
-    colorCtx.fillStyle = "rgba(0, 0, 0, 0)"
+    colorCtx.fillStyle = "rgba(8, 12, 24, 0)"
     colorCtx.fillStyle = color.trim()
     colorCtx.fillRect(0, 0, 1, 1)
     const data = colorCtx.getImageData(0, 0, 1, 1).data

@@ -63,7 +63,8 @@ const CardFront = forwardRef<HTMLDivElement, CardFrontProps>(
           position: "relative",
           overflow: "hidden",
           backgroundColor: front.bgColor,
-          boxShadow: forExport ? "none" : "var(--card-shadow, 0 20px 60px rgba(0,0,0,0.3))",
+          boxShadow:
+            forExport ? "none" : "var(--card-shadow, 0 20px 60px rgba(10, 15, 28, 0.28))",
           transition: forExport ? "none" : "box-shadow 200ms ease",
           flexShrink: 0,
           userSelect: "none",
@@ -114,7 +115,8 @@ const CardFront = forwardRef<HTMLDivElement, CardFrontProps>(
           style={{
             position: "absolute",
             inset: 0,
-            background: "linear-gradient(135deg, rgba(0,0,0,0.06) 0%, rgba(0,0,0,0.22) 100%)",
+            background:
+              "linear-gradient(135deg, rgba(12,18,34,0.05) 0%, rgba(12,18,34,0.2) 100%)",
             pointerEvents: "none",
           }}
         />
@@ -126,12 +128,12 @@ const CardFront = forwardRef<HTMLDivElement, CardFrontProps>(
               position: "absolute",
               top: 14 * scale,
               right: 18 * scale,
-              fontFamily: "var(--font-space-grotesk, 'Space Grotesk', sans-serif)",
+              fontFamily: "var(--font-archivo, 'Archivo', sans-serif)",
               fontWeight: 800,
               fontSize: 18 * scale,
               letterSpacing: "0.08em",
               color: "rgba(255,255,255,0.95)",
-              textShadow: "0 1px 4px rgba(0,0,0,0.4)",
+              textShadow: "0 1px 4px rgba(8, 14, 28, 0.4)",
               lineHeight: 1,
             }}
           >
@@ -153,7 +155,7 @@ const CardFront = forwardRef<HTMLDivElement, CardFrontProps>(
               letterSpacing: "0.15em",
               color: numberColor,
               textAlign: numberAlign,
-              textShadow: "0 1px 3px rgba(0,0,0,0.5)",
+              textShadow: "0 1px 3px rgba(8, 14, 28, 0.48)",
             }}
           >
             {number || "0000 0000 0000 0000"}
@@ -173,7 +175,7 @@ const CardFront = forwardRef<HTMLDivElement, CardFrontProps>(
               fontSize: numberFontSize * scale,
               letterSpacing: "0.12em",
               color: numberColor,
-              textShadow: "0 1px 3px rgba(0,0,0,0.5)",
+              textShadow: "0 1px 3px rgba(8, 14, 28, 0.48)",
               display: "flex",
               flexDirection: "column",
               alignItems: numberAlignItems,
@@ -207,7 +209,7 @@ const CardFront = forwardRef<HTMLDivElement, CardFrontProps>(
               letterSpacing: "0.08em",
               color: nameColor,
               textAlign: nameAlign,
-              textShadow: "0 1px 3px rgba(0,0,0,0.5)",
+              textShadow: "0 1px 3px rgba(8, 14, 28, 0.48)",
               textTransform: "uppercase",
             }}
           >
