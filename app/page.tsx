@@ -3,8 +3,8 @@
 import CardBack from "@/components/card-back";
 import CardFront from "@/components/card-front";
 import EditorPanel from "@/components/editor-panel";
-import { ToastAction } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
+import { ToastAction } from "@/components/ui/toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { toast } from "@/hooks/use-toast";
 import { CardState, defaultCardState } from "@/lib/card-types";
@@ -247,7 +247,7 @@ export default function Home() {
       </a>
 
       <header className="border-b border-border bg-card sticky top-0 z-50 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 h-14 sm:h-16 flex items-center justify-between gap-3">
+        <div className="relative max-w-7xl mx-auto px-4 min-h-14 sm:min-h-16 py-2 flex items-center justify-between gap-3">
           <div>
             <h1 className="text-base sm:text-sm font-bold text-foreground font-serif leading-none">
               Mi SUBE Personalizada
@@ -256,6 +256,18 @@ export default function Home() {
               Diseñá y exportá tu tarjeta
             </p>
           </div>
+
+          <p className="hidden sm:block absolute left-1/2 -translate-x-1/2 text-xs text-muted-foreground leading-none">
+            hecho con {"<3"} por{" "}
+            <a
+              href="https://x.com/DevJuanCruz"
+              target="_blank"
+              rel="noreferrer"
+              className="underline underline-offset-2 hover:text-foreground transition-colors"
+            >
+              juan cruz
+            </a>
+          </p>
 
           <div className="hidden sm:flex items-center gap-2 justify-end">
             <Button
@@ -426,7 +438,11 @@ export default function Home() {
                     Frente
                   </h3>
                   <div className="[--card-shadow:0_18px_50px_rgba(10,15,28,0.24)]">
-                    <CardFront ref={frontRef} card={card} scale={previewScale} />
+                    <CardFront
+                      ref={frontRef}
+                      card={card}
+                      scale={previewScale}
+                    />
                   </div>
                 </section>
 
@@ -484,7 +500,10 @@ export default function Home() {
               </div>
 
               <div className="flex flex-col lg:flex-row items-center lg:items-start justify-center gap-10 lg:gap-12">
-                <section className="flex flex-col items-center gap-3" aria-labelledby="front-title">
+                <section
+                  className="flex flex-col items-center gap-3"
+                  aria-labelledby="front-title"
+                >
                   <h3
                     id="front-title"
                     className="text-sm font-semibold uppercase tracking-wider px-2 py-0.5 rounded bg-primary/10 text-primary"
@@ -496,7 +515,10 @@ export default function Home() {
                   </div>
                 </section>
 
-                <section className="flex flex-col items-center gap-3" aria-labelledby="back-title">
+                <section
+                  className="flex flex-col items-center gap-3"
+                  aria-labelledby="back-title"
+                >
                   <h3
                     id="back-title"
                     className="text-sm font-semibold uppercase tracking-wider px-2 py-0.5 rounded bg-primary/10 text-primary"
@@ -506,7 +528,9 @@ export default function Home() {
                   <div className="transition-transform duration-200 ease-out hover:scale-[1.02] will-change-transform [--card-shadow:0_18px_50px_rgba(10,15,28,0.24)] hover:[--card-shadow:0_26px_70px_rgba(10,15,28,0.34)]">
                     <CardBack ref={backRef} card={card} />
                   </div>
-                  <p className="text-sm text-muted-foreground">Incluye banda magnética</p>
+                  <p className="text-sm text-muted-foreground">
+                    Incluye banda magnética
+                  </p>
                 </section>
               </div>
             </div>
